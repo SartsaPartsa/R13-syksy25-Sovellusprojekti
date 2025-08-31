@@ -8,3 +8,6 @@ This folder contains UI design documentation for the project.
 - After making changes in Figma:
   1. Export the updated designs to PDF format
   2. Add or update the PDFs in this folder to keep documentation current
+
+## Updated
+- 31.08.2025
