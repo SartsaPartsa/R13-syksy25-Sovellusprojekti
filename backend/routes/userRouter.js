@@ -11,6 +11,7 @@ router.post('/signup', (req, res, next) => {
 
   if (!user || !user.email || !user.password) {
     const error = new Error('Email and password are required')
+    error.status = 400
     return next(error)
   }
 
