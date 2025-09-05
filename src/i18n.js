@@ -56,14 +56,14 @@ const resources = {
       footerFollowUs: 'Follow us',
     },
   },
-} as const
+}
 
 i18n
   .use(initReactI18next)
   .init({
     resources,
-  lng: localStorage.getItem('lang') || 'fi',
-  fallbackLng: 'fi',
+    lng: localStorage.getItem('lang') || 'fi',
+    fallbackLng: 'fi',
     defaultNS: 'common',
     interpolation: { escapeValue: false },
   })

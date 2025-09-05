@@ -1,27 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-type Option = { value: string; label: string }
-
 // FancySelect: lightweight custom dropdown with keyboard and outside-click handling
-function FancySelect({
-  value,
-  onChange,
-  options,
-  placeholder,
-  className = '',
-  align = 'right',
-}: {
-  value?: string
-  onChange?: (v: string) => void
-  options: Option[]
-  placeholder?: string
-  className?: string
-  align?: 'left' | 'right'
-}) {
+function FancySelect({ value, onChange, options, placeholder, className = '', align = 'right' }) {
   const [open, setOpen] = useState(false)
-  const btnRef = useRef<HTMLButtonElement | null>(null)
-  const panelRef = useRef<HTMLDivElement | null>(null)
+  const btnRef = useRef(null)
+  const panelRef = useRef(null)
 
   const selected = options.find((o) => o.value === value)
   const label = selected?.label || placeholder || ''
@@ -29,8 +13,8 @@ function FancySelect({
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
     if (!open) return
-    const handler = (e: MouseEvent | TouchEvent) => {
-      const t = e.target as Node
+    const handler = (e) => {
+      const t = e.target
       if (
         panelRef.current &&
         !panelRef.current.contains(t) &&
@@ -39,7 +23,7 @@ function FancySelect({
         setOpen(false)
       }
     }
-    const onKey = (e: KeyboardEvent) => {
+    const onKey = (e) => {
       if (e.key === 'Escape') setOpen(false)
     }
     document.addEventListener('mousedown', handler)
@@ -59,7 +43,7 @@ function FancySelect({
         type="button"
         ref={btnRef}
         onClick={() => setOpen((v) => !v)}
-  className="h-10 inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 pr-8 text-sm text-white ring-1 ring-white/10 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#F18800]"
+        className="h-10 inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 pr-8 text-sm text-white ring-1 ring-white/10 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#F18800]"
       >
         <span className="truncate max-w-[11rem]">{label}</span>
         <svg
@@ -124,22 +108,22 @@ const linksKeys = [
 export function Navbar() {
   const [open, setOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [activeKey, setActiveKey] = useState<string>(() =>
+  const [activeKey, setActiveKey] = useState(() =>
     localStorage.getItem('activeNav') || 'home'
   )
-  const searchPanelRef = useRef<HTMLDivElement | null>(null)
-  const searchBtnDesktopRef = useRef<HTMLButtonElement | null>(null)
-  const searchBtnMobileRef = useRef<HTMLButtonElement | null>(null)
+  const searchPanelRef = useRef(null)
+  const searchBtnDesktopRef = useRef(null)
+  const searchBtnMobileRef = useRef(null)
   const { t, i18n } = useTranslation('common')
 
-  const changeLang = (lng: 'fi' | 'en') => {
+  const changeLang = (lng) => {
     i18n.changeLanguage(lng)
     localStorage.setItem('lang', lng)
   }
 
   // Close panels on Escape and collapse mobile menu when viewport is wide
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    const onKey = (e) => {
       if (e.key === 'Escape') {
         setOpen(false)
         setSearchOpen(false)
@@ -157,8 +141,8 @@ export function Navbar() {
   // Close search panel when clicking outside of it
   useEffect(() => {
     if (!searchOpen) return
-    const handler = (e: MouseEvent | TouchEvent) => {
-      const t = e.target as Node
+    const handler = (e) => {
+      const t = e.target
       const panel = searchPanelRef.current
       const b1 = searchBtnDesktopRef.current
       const b2 = searchBtnMobileRef.current
@@ -180,7 +164,7 @@ export function Navbar() {
   }, [searchOpen])
 
   // Update active navigation item and persist selection
-  const setActive = (key: string) => {
+  const setActive = (key) => {
     setActiveKey(key)
     try {
       localStorage.setItem('activeNav', key)
@@ -190,12 +174,12 @@ export function Navbar() {
   // Top header container
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-gray-900/90 backdrop-blur relative">
-  <nav className="flex h-16 w-full items-center justify-between px-4 md:px-8 max-w-7xl mx-auto relative">
+      <nav className="flex h-16 w-full items-center justify-between px-4 md:px-8 max-w-7xl mx-auto relative">
         {/* Logo and app name */}
-  <a
+        <a
           href="#"
           className="group inline-flex items-center gap-3"
-          aria-label={t('home') as string}
+          aria-label={t('home')}
           onClick={(e) => {
             e.preventDefault()
             setActive('home')
@@ -213,13 +197,13 @@ export function Navbar() {
           <span className="text-lg font-semibold tracking-tight text-white">
             {t('appName')}
           </span>
-  </a>
+        </a>
 
-    {/* Desktop navigation and controls */}
-  <div className="hidden md:flex items-center">
+        {/* Desktop navigation and controls */}
+        <div className="hidden md:flex items-center">
           <ul className="flex list-none items-center gap-1 mr-3">
             {linksKeys.map((l) => (
-        <li key={l.key}>
+              <li key={l.key}>
                 <a
                   href={l.href}
                   onClick={() => setActive(l.key)}
@@ -229,7 +213,7 @@ export function Navbar() {
                       : 'text-gray-100 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  {t(l.key as any)}
+                  {t(l.key)}
                 </a>
               </li>
             ))}
@@ -237,16 +221,16 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             {/* Theater selector (desktop) */}
             <FancySelect
-              placeholder={t('chooseTheater') as string}
+              placeholder={t('chooseTheater')}
               options={[
-                { value: 'placeholder', label: t('chooseTheater') as string },
+                { value: 'placeholder', label: t('chooseTheater') },
               ]}
               align="left"
             />
             {/* Language selector (desktop) */}
             <FancySelect
               value={i18n.language}
-              onChange={(lng) => changeLang(lng as 'fi' | 'en')}
+              onChange={(lng) => changeLang(lng)}
               options={[
                 { value: 'fi', label: 'FIN' },
                 { value: 'en', label: 'ENG' },
@@ -271,10 +255,10 @@ export function Navbar() {
               </svg>
             </button>
           </div>
-  </div>
+        </div>
         {/* Search (mobile) */}
-  {/* Mobile controls: search and menu toggle */}
-  <div className="md:hidden flex items-center gap-1">
+        {/* Mobile controls: search and menu toggle */}
+        <div className="md:hidden flex items-center gap-1">
           {/* Search (mobile) */}
           <button
             type="button"
@@ -305,7 +289,7 @@ export function Navbar() {
             </svg>
           </button>
         </div>
-  {/* Floating search panel */}
+        {/* Floating search panel */}
         {searchOpen && (
           <div className="absolute right-0 top-16 z-50">
             <div
@@ -316,7 +300,7 @@ export function Navbar() {
               <input
                 id="global-search"
                 type="text"
-                placeholder={t('search') as string}
+                placeholder={t('search')}
                 autoFocus
                 className="w-full rounded-md bg-gray-800/60 text-white placeholder-gray-400 px-3 py-2 ring-1 ring-white/10 focus:ring-2 focus:ring-[#F18800] outline-none"
               />
@@ -325,13 +309,13 @@ export function Navbar() {
         )}
       </nav>
 
-  {/* Mobile dropdown menu with links and selectors */}
-  <div
+      {/* Mobile dropdown menu with links and selectors */}
+      <div
         className={`md:hidden absolute inset-x-0 top-16 bg-gray-900/98 backdrop-blur-xl backdrop-saturate-200 shadow-lg border-b border-white/10 ${
           open ? 'block' : 'hidden'
         }`}
       >
-  <ul className="list-none px-4 py-2 md:px-8 divide-y divide-white/5">
+        <ul className="list-none px-4 py-2 md:px-8 divide-y divide-white/5">
           {linksKeys.map((l) => (
             <li key={l.key}>
               <a
@@ -346,7 +330,7 @@ export function Navbar() {
                     : 'text-white hover:bg-white/5'
                 }`}
               >
-                {t(l.key as any)}
+                {t(l.key)}
               </a>
             </li>
           ))}
@@ -364,7 +348,7 @@ export function Navbar() {
               <select
                 className="w-full appearance-none bg-gray-800/60 text-white ring-1 ring-white/10 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#F18800] rounded-md px-3 pr-8 h-10"
                 value={i18n.language}
-                onChange={(e) => changeLang(e.target.value as 'fi' | 'en')}
+                onChange={(e) => changeLang(e.target.value)}
               >
                 <option value="fi">FIN</option>
                 <option value="en">ENG</option>
