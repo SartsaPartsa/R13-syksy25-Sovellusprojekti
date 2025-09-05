@@ -1,10 +1,9 @@
-import type { PropsWithChildren } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navbar } from '../components/Navbar'
-import * as si from 'simple-icons/icons'
+import { siFacebook, siInstagram, siTiktok, siYoutube } from 'simple-icons/icons'
 
 // SocialIcon: simple SVG link for external social profiles
-function SocialIcon({ icon, href, label }: { icon: { path: string }; href: string; label: string }) {
+function SocialIcon({ icon, href, label }) {
   // Render external link with SVG icon
   return (
     <a
@@ -22,7 +21,7 @@ function SocialIcon({ icon, href, label }: { icon: { path: string }; href: strin
 }
 
 // AppLayout: page shell with navbar, main content area and footer
-export default function AppLayout({ children }: PropsWithChildren) {
+export default function AppLayout({ children }) {
   const { t } = useTranslation('common')
   return (
     <div className="min-h-dvh flex flex-col bg-gray-900 text-slate-200">
@@ -52,11 +51,11 @@ export default function AppLayout({ children }: PropsWithChildren) {
               <h4 className="text-white font-semibold mb-4">{t('footerFollowUs')}</h4>
               <div className="flex justify-center gap-5">
                 {[
-                  { icon: (si as any).siFacebook, href: '#', label: 'Facebook' },
-                  { icon: (si as any).siInstagram, href: '#', label: 'Instagram' },
-                  { icon: (si as any).siTiktok, href: '#', label: 'TikTok' },
-                  { icon: (si as any).siLinkedin, href: '#', label: 'LinkedIn' },
-                  { icon: (si as any).siYoutube, href: '#', label: 'YouTube' },
+                  { icon: siFacebook, href: '#', label: 'Facebook' },
+                  { icon: siInstagram, href: '#', label: 'Instagram' },
+                  { icon: siTiktok, href: '#', label: 'TikTok' },
+                  { icon: undefined, href: '#', label: 'LinkedIn' },
+                  { icon: siYoutube, href: '#', label: 'YouTube' },
                 ]
                   .filter((x) => x.icon && x.icon.path)
                   .map((x) => (

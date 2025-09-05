@@ -7,19 +7,19 @@ public/
     oamk.png            # julkinen logo (viitataan src="/images/oamk.png")
 src/
   components/
-    Navbar.tsx          # responsiivinen yläpalkki (desktop-menu + mobiilipaneeli)
+    Navbar.jsx          # responsiivinen yläpalkki (desktop-menu + mobiilipaneeli)
   layouts/
-    AppLayout.tsx       # sovelluksen runko (header, main, footer)
+    AppLayout.jsx       # sovelluksen runko (header, main, footer)
   pages/
-    Home.tsx            # etusivun sisältö
+    Home.jsx            # etusivun sisältö
   styles/
     tailwind.css        # @tailwind base; @tailwind components; @tailwind utilities
-  i18n.ts               # i18next-konfiguraatio ja kieliresurssit
-  main.tsx              # käynnistää sovelluksen, import './i18n'
+  i18n.js               # i18next-konfiguraatio ja kieliresurssit
+  main.jsx              # käynnistää sovelluksen, import './i18n'
 index.html
 tailwind.config.js
 postcss.config.js       # käyttää '@tailwindcss/postcss' (Tailwind v4)
-vite.config.ts
+vite.config.js
 ```
 
 ---
@@ -43,13 +43,13 @@ Tyypilliset luokat:
 
 Kielituki on toteutettu `i18next` + `react-i18next` -kirjastoilla.
 
-- Konfiguraatio ja kieliresurssit ovat tiedostossa `src/i18n.ts`
-- Sovellus alustaa i18n:n rivillä `import './i18n'` tiedostossa `src/main.tsx`
+- Konfiguraatio ja kieliresurssit ovat tiedostossa `src/i18n.js`
+- Sovellus alustaa i18n:n rivillä `import './i18n'` tiedostossa `src/main.jsx`
 - Tekstit haetaan komponenteissa `useTranslation()`-hookilla: `t('avain')`
 - Suomi ja englanti ovat `common`-nimisessä namespacessa
 
 Lyhyt käyttöesimerkki:
-```tsx
+```jsx
 import { useTranslation } from 'react-i18next'
 const { t } = useTranslation()
 <h1>{t('title')}</h1>
@@ -70,5 +70,8 @@ const { t } = useTranslation()
 ```bash
 npm install
 npm run dev
+
+backend: 
+npm run devStart
 ```
 
