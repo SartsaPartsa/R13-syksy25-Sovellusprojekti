@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Navbar } from '../components/Navbar'
 import { siFacebook, siInstagram, siTiktok, siYoutube } from 'simple-icons/icons'
+import { Outlet } from 'react-router-dom'
 
 // SocialIcon: simple SVG link for external social profiles
 function SocialIcon({ icon, href, label }) {
@@ -21,7 +22,7 @@ function SocialIcon({ icon, href, label }) {
 }
 
 // AppLayout: page shell with navbar, main content area and footer
-export default function AppLayout({ children }) {
+export default function AppLayout({}) {
   const { t } = useTranslation('common')
   return (
     <div className="min-h-dvh flex flex-col bg-gray-900 text-slate-200">
@@ -30,7 +31,7 @@ export default function AppLayout({ children }) {
       {/* Main content area */}
       <main className="flex-1 bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
+           <Outlet />
         </div>
       </main>
       {/* Footer with three columns: APIs, social links, authors */}
