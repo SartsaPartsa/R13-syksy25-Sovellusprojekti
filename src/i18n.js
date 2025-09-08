@@ -10,6 +10,7 @@ const resources = {
       theaters: 'Teatterit',
       search: 'Haku',
       login: 'Kirjaudu sisään',
+      loginLead: 'Kirjaudu sisään jatkaaksesi',
       chooseTheater: 'Valitse teatteri',
       langFi: 'Suomi',
       langEn: 'Englanti',
@@ -27,6 +28,11 @@ const resources = {
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Ryhmä 13',
       footerFollowUs: 'Seuraa meitä',
+      notFound: {
+        title: "404",
+        lead: 'Sivua ei löytynyt.',
+        backHome: 'Takaisin etusivulle',
+      },
     },
   },
   en: {
@@ -37,6 +43,7 @@ const resources = {
       theaters: 'Theaters',
       search: 'Search',
       login: 'Sign in',
+      loginLead: 'Sign in to continue',
       chooseTheater: 'Choose theater',
       langFi: 'Finnish',
       langEn: 'English',
@@ -54,6 +61,11 @@ const resources = {
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Team 13',
       footerFollowUs: 'Follow us',
+      notFound: {
+        title: "404",
+        lead: 'Page not found.',
+        backHome: 'Back to home',
+      },
     },
   },
 }
