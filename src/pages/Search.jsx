@@ -24,6 +24,9 @@ export default function Search() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [ratingValue, setRatingValue] = useState(minRating)
+
+  useEffect(() => { setRatingValue(minRating) }, [minRating])
 
   // sync TMDB lang with i18n
   useEffect(() => {
@@ -161,7 +164,7 @@ export default function Search() {
           ))}
           <button
             className="text-sm text-neutral-300 hover:text-white underline"
-            onClick={() => updateParams({ genre: '', minRating: '', yearFrom: '', yearTo: '', sort: '' })}
+            onClick={() => { setRatingValue(0); updateParams({ genre: '', minRating: '', yearFrom: '', yearTo: '', sort: '' }) }}
           >
             {t('filters.clear')}
           </button>
@@ -201,10 +204,10 @@ export default function Search() {
             <label className="text-sm text-neutral-300">{t('filters.minRating')}</label>
             <input
               type="range" min={0} max={10} step={0.5}
-              value={isNaN(minRating) ? 0 : minRating}
-              onChange={(e) => updateParams({ minRating: Number(e.target.value) })}
+              value={isNaN(ratingValue) ? 0 : ratingValue}
+              onChange={(e) => { const v = Number(e.target.value); setRatingValue(v); updateParams({ minRating: v }) }}
             />
-            <span className="text-sm text-neutral-200">{(isNaN(minRating) ? 0 : minRating).toFixed(1)}</span>
+            <span className="text-sm text-neutral-200">{(isNaN(ratingValue) ? 0 : ratingValue).toFixed(1)}</span>
           </div>
         </div>
 
