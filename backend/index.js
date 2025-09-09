@@ -11,7 +11,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use(userRouter)
+app.use('/user',userRouter)
 app.use('/api/search', searchRouter);
 app.use('/api/movies', movieRouter)
 

@@ -116,7 +116,21 @@ export function Navbar() {
   const navigate = useNavigate()
   const [term, setTerm] = useState('')
   const langToTMDB = (lng) => (lng?.startsWith('fi') ? 'fi-FI' : 'en-US')
+  const [userLoggedIn, setUserLoggedIn] = useState(false)
 
+
+  useEffect(() => {
+    // Tarkista onko token localStoragessa (tai muu logiikka)
+    const token = localStorage.getItem('token')
+    setUserLoggedIn(!!token)
+  }, [])
+
+  // Logout-funktio
+  function logout() {
+    localStorage.removeItem('token')  // Poista token
+    setUserLoggedIn(false)
+    navigate('/')  // ohjaa etusivulle
+  }
   function submitSearch() {
     const q = term.trim()
     if (!q) return
