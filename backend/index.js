@@ -2,6 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import userRouter from './routes/userRouter.js'
+import searchRouter from './routes/searchRouter.js';
+import movieRouter from './routes/movieRouter.js'
 
 dotenv.config()
 
@@ -10,6 +12,8 @@ app.use(cors())
 app.use(express.json())
 
 app.use(userRouter)
+app.use('/api/search', searchRouter);
+app.use('/api/movies', movieRouter)
 
 app.use((err, req, res, next) => {
   if (err?.code === '23505') {

@@ -59,8 +59,10 @@ const { t } = useTranslation()
 
 ## Staattiset kuvat ja ikonit
 
-- Julkiset kuvat (esim. Oamk-logo) sijoitetaan `public/images/`-kansioon  
-  ja käytetään polulla `/images/oamk.png`.
+- Sovelluksen kuvat (esim. OAMK-logo) sijoitetaan `src/assets/images/`-kansioon ja otetaan käyttöön importilla:
+  ```jsx
+  import oamkLogo from '../assets/images/oamk.png'
+  <img src={oamkLogo} alt="OAMK" />
 - Emoji-logon (esim. 🎥) koko skaalataan tekstikoolla (`text-2xl`, `text-3xl`) ikonin sisällä.
 
 ---

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 
 // FancySelect: lightweight custom dropdown with keyboard and outside-click handling
 function FancySelect({ value, onChange, options, placeholder, className = '', align = 'right' }) {
@@ -113,6 +113,18 @@ export function Navbar() {
   const searchBtnDesktopRef = useRef(null)
   const searchBtnMobileRef = useRef(null)
   const { t, i18n } = useTranslation('common')
+  const navigate = useNavigate()
+  const [term, setTerm] = useState('')
+  const langToTMDB = (lng) => (lng?.startsWith('fi') ? 'fi-FI' : 'en-US')
+
+  function submitSearch() {
+    const q = term.trim()
+    if (!q) return
+    const tmdbLang = langToTMDB(i18n.language)
+    navigate(`/search?q=${encodeURIComponent(q)}&page=1&language=${tmdbLang}`)
+    setSearchOpen(false)
+    setOpen(false)
+  }
 
   const changeLang = (lng) => {
     i18n.changeLanguage(lng)
@@ -263,14 +275,31 @@ export function Navbar() {
               ref={searchPanelRef}
               className="bg-gray-900/95 backdrop-blur-md border border-white/10 rounded-lg shadow-lg p-3 w-[calc(100vw-2rem)] max-w-sm"
             >
-              <label className="sr-only" htmlFor="global-search">{t('search')}</label>
-              <input
-                id="global-search"
-                type="text"
-                placeholder={t('search')}
-                autoFocus
-                className="w-full rounded-md bg-gray-800/60 text-white placeholder-gray-400 px-3 py-2 ring-1 ring-white/10 focus:ring-2 focus:ring-[#F18800] outline-none"
-              />
+              <form
+                onSubmit={(e) => { e.preventDefault(); submitSearch() }}
+                className="flex items-center gap-2"
+              >
+                <label className="sr-only" htmlFor="global-search">{t('search')}</label>
+                <input
+                  id="global-search"
+                      type="text"
+                      placeholder={t('search')}
+                      autoFocus
+                      value={term}
+                      onChange={(e) => setTerm(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitSearch() } }}
+                      className="w-full rounded-md bg-gray-800/60 text-white placeholder-gray-400 px-3 py-2 ring-1 ring-white/10 focus:ring-2 focus:ring-[#F18800] outline-none"
+                    />
+                    <button
+                      type="submit"
+                      aria-label={t('search')}
+                      className="inline-flex items-center justify-center rounded-md px-3 py-2 bg-white/10 hover:bg-white/20 ring-1 ring-white/10"
+                    >
+                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                     <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" />
+                   </svg>
+                 </button>
+               </form>
             </div>
           </div>
         )}
