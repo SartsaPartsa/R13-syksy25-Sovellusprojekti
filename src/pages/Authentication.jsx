@@ -16,7 +16,7 @@ export default function Authentication({ authenticationMode, toggleMode }) {
   const { user, setUser, signUp, signIn } = useUser()
   const navigate = useNavigate()
   const { t } = useTranslation('common')
-
+//ehtojen määrittelyä
 const handleSubmit = async (e) => {
   e.preventDefault()
 
