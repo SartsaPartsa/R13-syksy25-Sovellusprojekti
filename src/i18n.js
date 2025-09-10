@@ -1,6 +1,6 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-
+import { toast } from 'react-toastify'
 const resources = {
   fi: {
     common: {
@@ -13,6 +13,13 @@ const resources = {
       signup:'Rekisteröidy',
       login: 'Kirjaudu sisään',
       loginlead: 'Kirjaudu sisään jatkaaksesi',
+       loginSuccess: 'Kirjautuminen onnistui!',
+  signupSuccess: "Rekisteröityminen onnistui! Nyt voit kirjautua sisään.",
+  authFailed: "Kirjautuminen epäonnistui, yritä uudelleen.",
+  invalidPassword:'Salasanassa pitää olla vähintään 8 merkkiä, yksi iso kirjain ja yksi erikoismerkki.',
+  invalidEmail:'Sähköpostiosoite ei ole kelvollinen.',
+  missingFields:'Syötä sähköposti ja salasana.',
+  signupFailed:'Rekisteröityminen epäonnistui. Tarkista tiedot.',
       logout:'Kirjaudu ulos',
       favorites: "Suosikit",
       groups: "Ryhmät",
@@ -98,6 +105,13 @@ const resources = {
       logout:'Log out',
       signUp: 'Sign Up',
       signup:'Sign Up',
+      loginSuccess: 'Login successful!',
+      invalidPassword:'The password must contain at least 8 characters, one uppercase letter and one special character.',
+      invalidEmail:'Email address is not valid.',
+      missingFields:'Enter email and password.',
+  signupSuccess: 'Registration successful! You can now log in.',
+  authFailed: 'Login failed,try again.',
+  signupFailed:'Registration failed. Please check your details.',
       favorites: "Favorites",
       groups: "Groups",
       myAccount: "My account",

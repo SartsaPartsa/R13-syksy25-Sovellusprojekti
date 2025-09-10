@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '../context/useUser'
-
+import { toast } from 'react-toastify'
 export const AuthenticationMode = Object.freeze({
   SignIn: 'SignIn',
   SignUp: 'SignUp',
@@ -17,21 +17,53 @@ export default function Authentication({ authenticationMode, toggleMode }) {
   const navigate = useNavigate()
   const { t } = useTranslation('common')
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      if (authenticationMode === AuthenticationMode.SignUp) {
-        await signUp()
-        navigate('/login')
-      } else {
-        await signIn(user.email, user.password)
-        navigate('/')
-      }
-    } catch (err) {
-      alert(err?.message || 'Authentication failed')
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault()
+
+  
+  if (!user.email || !user.password) {
+    toast.error(t('missingFields') || 'Syötä sähköposti ja salasana')
+    return
   }
 
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(user.email)) {
+    toast.error(t('invalidEmail') || 'Sähköpostiosoite ei ole kelvollinen.')
+    return
+  }
+
+  const password = user.password
+  const hasUpperCase = /[A-Z]/.test(password)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  const isLongEnough = password.length >= 8
+
+  if (!hasUpperCase || !hasSpecialChar || !isLongEnough) {
+    toast.error(
+      t('invalidPassword') ||
+        'Salasanassa pitää olla vähintään 8 merkkiä, yksi iso kirjain ja yksi erikoismerkki.'
+    )
+    return
+  }
+
+  try {
+    if (authenticationMode === AuthenticationMode.SignUp) {
+      await signUp()
+      toast.success(t('signupSuccess') || 'Rekisteröityminen onnistui! Nyt voit kirjautua sisään.')
+      navigate('/login')
+    } else {
+      await signIn(user.email, user.password)
+      toast.success(t('loginSuccess') || 'Kirjautuminen onnistui!')
+      navigate('/')
+    }
+  } catch (err) {
+  if (authenticationMode === AuthenticationMode.SignIn) {
+    toast.error(t('authFailed') || 'Kirjautuminen epäonnistui. Yritä uudelleen.')
+  } else {
+    toast.error(t('signupFailed') || 'Rekisteröityminen epäonnistui. Tarkista tiedot.')
+  }
+}
+}
   return (
     <div className="max-w-md mx-auto bg-gray-700 rounded p-6 shadow-md">
       <h3 className="text-2xl font-bold mb-4">

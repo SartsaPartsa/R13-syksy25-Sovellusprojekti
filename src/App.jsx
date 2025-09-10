@@ -11,9 +11,13 @@ import Groups from './pages/Groups'
 import Account from './pages/Account'
 import Search from './pages/Search.jsx'
 import MovieDetails from './pages/MovieDetails.jsx'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 export default function App() {
   return (
+    <>
+     <ToastContainer position="top-center" autoClose={3000} />
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<Home />} />
@@ -33,5 +37,6 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
+    </>
   )
 }
