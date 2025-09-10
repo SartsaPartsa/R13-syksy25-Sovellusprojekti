@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useUser } from '../context/useUser'
 
 // FancySelect: lightweight custom dropdown with keyboard and outside-click handling
 function FancySelect({ value, onChange, options, placeholder, className = '', align = 'right' }) {
@@ -99,10 +100,18 @@ function FancySelect({ value, onChange, options, placeholder, className = '', al
 }
 
 // Navigation links used by both desktop and mobile menus
+// Navigation links always visible
 const LINKS = [
   { to: '/', key: 'home' },
   { to: '/movies', key: 'movies' },
   { to: '/theaters', key: 'theaters' },
+]
+
+// Links visible only when user is logged in
+const AUTH_LINKS = [
+  { to: '/favorites', key: 'favorites' },
+  { to: '/groups', key: 'groups' },
+  { to: '/account', key: 'myAccount' },
 ]
 
 // Navbar: responsive top navigation with search, language and theater selectors
@@ -114,23 +123,22 @@ export function Navbar() {
   const searchBtnMobileRef = useRef(null)
   const { t, i18n } = useTranslation('common')
   const navigate = useNavigate()
+  const { isAuthenticated, logout: ctxLogout } = useUser()
   const [term, setTerm] = useState('')
   const langToTMDB = (lng) => (lng?.startsWith('fi') ? 'fi-FI' : 'en-US')
   const [userLoggedIn, setUserLoggedIn] = useState(false)
+  const visibleLinks = userLoggedIn ? [...LINKS, ...AUTH_LINKS] : LINKS
 
+  // Sync userLoggedIn state with authentication context (reacts to login/logout)
+  useEffect(() => { 
+    setUserLoggedIn(isAuthenticated) 
+  }, [isAuthenticated])
 
-  useEffect(() => {
-    // Tarkista onko token localStoragessa (tai muu logiikka)
-    const token = localStorage.getItem('token')
-    setUserLoggedIn(!!token)
-  }, [])
-
-  // Logout-funktio
-  function logout() {
-    localStorage.removeItem('token')  // Poista token
-    setUserLoggedIn(false)
-    navigate('/')  // ohjaa etusivulle
-  }
+  // Logout-function
+   function logout() {
+     ctxLogout()
+     navigate('/')
+   }
   function submitSearch() {
     const q = term.trim()
     if (!q) return
@@ -196,7 +204,7 @@ export function Navbar() {
         {/* Desktop links */}
         <div className="hidden md:flex items-center">
           <ul className="flex list-none items-center gap-1 mr-3">
-            {LINKS.map(l => (
+            {visibleLinks.map(l => (
               <li key={l.key}>
                 <NavLink
                   to={l.to}
@@ -229,12 +237,22 @@ export function Navbar() {
             />
 
             {/* Login */}
-            <Link
-              to="/login"
-              className="inline-flex items-center bg-[#F18800] hover:bg-[#F18800]/90 text-black font-medium px-4 rounded-md h-10 transition-colors shadow-sm ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]/60"
-            >
-              {t('login')}
-            </Link>
+              {userLoggedIn ? (
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="inline-flex items-center bg-[#F18800] hover:bg-[#F18800]/90 text-black font-medium px-4 rounded-md h-10 transition-colors shadow-sm ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]/60"
+                >
+                  {t('logout')}
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center bg-[#F18800] hover:bg-[#F18800]/90 text-black font-medium px-4 rounded-md h-10 transition-colors shadow-sm ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]/60"
+                >
+                  {t('login')}
+                </Link>
+              )}
 
             {/* Search (desktop) */}
             <button
@@ -322,7 +340,7 @@ export function Navbar() {
       {/* Mobile dropdown */}
       <div className={`md:hidden absolute inset-x-0 top-16 bg-gray-900/98 backdrop-blur-xl backdrop-saturate-200 shadow-lg border-b border-white/10 ${open ? 'block' : 'hidden'}`}>
         <ul className="list-none px-4 py-2 md:px-8 divide-y divide-white/5">
-          {LINKS.map(l => (
+          {visibleLinks.map(l => (
             <li key={l.key}>
               <NavLink
                 to={l.to}
@@ -362,13 +380,23 @@ export function Navbar() {
             </div>
           </li>
           <li className="px-1 pt-3 pb-2">
-            <Link
-              to="/login"
-              onClick={() => setOpen(false)}
-              className="block rounded-md bg-[#F18800] px-3 py-2 text-center font-medium text-black hover:bg-[#F18800]/90 shadow-sm ring-1 ring-black/10"
-            >
-              {t('login')}
-            </Link>
+            {userLoggedIn ? (
+              <button
+                type="button"
+                onClick={() => { logout(); setOpen(false) }}
+                className="block w-full rounded-md bg-[#F18800] px-3 py-2 text-center font-medium text-black hover:bg-[#F18800]/90 shadow-sm ring-1 ring-black/10"
+              >
+                {t('logout')}
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setOpen(false)}
+                className="block rounded-md bg-[#F18800] px-3 py-2 text-center font-medium text-black hover:bg-[#F18800]/90 shadow-sm ring-1 ring-black/10"
+              >
+                {t('login')}
+              </Link>
+            )}
           </li>
         </ul>
       </div>
