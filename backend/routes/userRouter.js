@@ -6,6 +6,41 @@ import jwt from 'jsonwebtoken'
 const { sign } = jwt
 const router = Router()
 
+// apufunktio ("minimipituus on 8 merkkiä sisältäen vähintään yhden ison kirjaimen ja numeron.")
+const isValidEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)
+const isStrongPassword = (pwd) => /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)
+
+router.post('/signup', (req, res, next) => {
+  const { user } = req.body
+  if (!user || !user.email || !user.password) {
+    const err = new Error('Email and password are required')
+    err.status = 400
+    return next(err)
+  }
+  if (!isValidEmail(user.email)) {
+    const err = new Error('Invalid email')
+    err.status = 400
+    return next(err)
+  }
+  if (!isStrongPassword(user.password)) {
+    const err = new Error('Password must be at least 8 chars, include an uppercase letter and a number')
+    err.status = 400
+    return next(err)
+  }
+
+  hash(user.password, 10, (err, hashed) => {
+    if (err) return next(err)
+    pool.query(
+      'INSERT INTO "user" (email, password_hash, created_at) VALUES ($1, $2, NOW()) RETURNING id, email',
+      [user.email, hashed],
+      (err, result) => {
+        if (err) return next(err)
+        return res.status(201).json(result.rows[0])
+      }
+    )
+  })
+})
+
 router.post('/signup', (req, res, next) => {
   const { user } = req.body
 
@@ -33,43 +68,24 @@ router.post('/signup', (req, res, next) => {
 
 router.post('/signin', (req, res, next) => {
   const { user } = req.body
-
   if (!user || !user.email || !user.password) {
-    const error = new Error('Email and password are required')
-    error.status = 400
-    return next(error)
+    const err = new Error('Email and password are required')
+    err.status = 400
+    return next(err)
   }
 
-  pool.query('SELECT * FROM "user" WHERE email = $1', [user.email], (err, result) => {
+  pool.query('SELECT * FROM "user" WHERE email = $1', [user.email], (err, r) => {
     if (err) return next(err)
-
-    if (result.rows.length === 0) {
-      const error = new Error('User not found')
-      error.status = 404
-      return next(error)
+    if (r.rows.length === 0) {
+      const e = new Error('User not found'); e.status = 404; return next(e)
     }
-
-    const dbUser = result.rows[0]
-
-    compare(user.password, dbUser.password_hash, (err, isMatch) => {
+    const dbUser = r.rows[0]
+    compare(user.password, dbUser.password_hash, (err, ok) => {
       if (err) return next(err)
+      if (!ok) { const e = new Error('Invalid password'); e.status = 401; return next(e) }
 
-      if (!isMatch) {
-        const error = new Error('Invalid password')
-        error.status = 401
-        return next(error)
-      }
-
-      const token = sign(
-        { user: dbUser.email },
-        process.env.JWT_SECRET
-      )
-
-      res.status(200).json({
-        id: dbUser.id,
-        email: dbUser.email,
-        token
-      })
+      const token = sign({ user: dbUser.email }, process.env.JWT_SECRET)
+      return res.status(200).json({ id: dbUser.id, email: dbUser.email, token })
     })
   })
 })

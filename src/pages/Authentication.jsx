@@ -35,13 +35,13 @@ const handleSubmit = async (e) => {
 
   const password = user.password
   const hasUpperCase = /[A-Z]/.test(password)
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  const hasNumber = /\d/.test(password)
   const isLongEnough = password.length >= 8
 
-  if (!hasUpperCase || !hasSpecialChar || !isLongEnough) {
+  if (!hasUpperCase || !hasNumber || !isLongEnough) {
     toast.error(
       t('invalidPassword') ||
-        'Salasanassa pitää olla vähintään 8 merkkiä, yksi iso kirjain ja yksi erikoismerkki.'
+        'Salasanassa pitää olla vähintään 8 merkkiä, yksi iso kirjain ja yksi numero.'
     )
     return
   }
