@@ -74,6 +74,7 @@ npm install
 npm run dev
 
 backend: 
+npm install
 npm run devStart
 ```
 
