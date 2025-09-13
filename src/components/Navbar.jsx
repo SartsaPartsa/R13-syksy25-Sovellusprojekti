@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useUser } from '../context/useUser'
 
 // FancySelect: lightweight custom dropdown with keyboard and outside-click handling
@@ -124,10 +124,16 @@ export function Navbar() {
   const { t, i18n } = useTranslation('common')
   const navigate = useNavigate()
   const { isAuthenticated, logout: ctxLogout } = useUser()
+  const location = useLocation()
   const [term, setTerm] = useState('')
   const langToTMDB = (lng) => (lng?.startsWith('fi') ? 'fi-FI' : 'en-US')
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const visibleLinks = userLoggedIn ? [...LINKS, ...AUTH_LINKS] : LINKS
+
+  // Theater quick-select (Finnkino) state
+  const [theaters, setTheaters] = useState([])
+  const [theatersLoading, setTheatersLoading] = useState(false)
+  const [selectedTheater, setSelectedTheater] = useState('')
 
   // Sync userLoggedIn state with authentication context (reacts to login/logout)
   useEffect(() => { 
@@ -185,6 +191,48 @@ export function Navbar() {
     }
   }, [searchOpen])
 
+  // Fetch theaters once (Finnkino XML API)
+  useEffect(() => {
+    let aborted = false
+    async function load() {
+      try {
+        setTheatersLoading(true)
+        const r = await fetch('https://www.finnkino.fi/xml/TheatreAreas/', { headers: { 'Accept': 'text/xml,application/xml;q=0.9,*/*;q=0.8' } })
+        if (!r.ok) throw new Error(r.status)
+        const xml = await r.text()
+        if (aborted) return
+        const doc = new window.DOMParser().parseFromString(xml, 'text/xml')
+        const nodes = Array.from(doc.getElementsByTagName('TheatreArea'))
+        const list = nodes
+          .map(n => ({ id: n.getElementsByTagName('ID')[0]?.textContent, name: n.getElementsByTagName('Name')[0]?.textContent }))
+          .filter(x => x.id && x.name && x.id !== '-1')
+          // Remove any API placeholder entries in any language (Finnish/English)
+          .filter(x => !/valitse\s+alue\/?teatteri/i.test(x.name) && !/choose\s+area\/?theater/i.test(x.name))
+        setTheaters(list)
+      } catch (e) {
+        // silent fail in navbar (user can still use Theaters page)
+      } finally {
+        if (!aborted) setTheatersLoading(false)
+      }
+    }
+    load()
+    return () => { aborted = true }
+  }, [])
+
+  // Sync selected theater with URL param if on /theaters
+  useEffect(() => {
+    const sp = new URLSearchParams(location.search)
+    const area = sp.get('area') || ''
+    if (area !== selectedTheater) setSelectedTheater(area)
+  }, [location.search])
+
+  const theaterOptions = theaters.map(t => ({ value: t.id, label: t.name }))
+
+  function onSelectTheater(id) {
+    setSelectedTheater(id)
+    navigate(`/theaters?area=${encodeURIComponent(id)}`)
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-gray-900/90 backdrop-blur relative">
       <nav className="flex h-16 w-full items-center justify-between px-4 md:px-8 max-w-7xl mx-auto relative">
@@ -223,10 +271,12 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-3">
-            {/* Theater */}
+            {/* Theater quick select */}
             <FancySelect
-              placeholder={t('chooseTheater')}
-              options={[{ value: 'placeholder', label: t('chooseTheater') }]}
+              value={selectedTheater}
+              onChange={onSelectTheater}
+              placeholder={theatersLoading ? '…' : t('chooseTheater')}
+              options={theaterOptions}
               align="left"
             />
             {/* Language */}
@@ -360,8 +410,14 @@ export function Navbar() {
           {/* Mobile selectors */}
           <li className="px-1 pt-3">
             <div className="relative">
-              <select className="w-full appearance-none bg-gray-800/60 text-white ring-1 ring-white/10 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#F18800] rounded-md px-3 pr-8 h-10">
-                <option>{t('chooseTheater')}</option>
+              <select
+                className="w-full appearance-none bg-gray-800/60 text-white ring-1 ring-white/10 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#F18800] rounded-md px-3 pr-8 h-10"
+                value={selectedTheater}
+                onChange={(e) => { const v = e.target.value; if (v) onSelectTheater(v) }}
+              >
+                {theaterOptions.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
               </select>
               <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.17l3.71-2.94a.75.75 0 1 1 .94 1.16l-4.24 3.36a.75.75 0 0 1-.94 0L5.21 8.39a.75.75 0 0 1 .02-1.18z"/></svg>
             </div>
