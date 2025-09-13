@@ -9,15 +9,15 @@ export function getAuthToken() {
   }
 }
 
-/**
- * Удалить текущего пользователя
- * Будет использовать переданный token, а если не передали — возьмёт из localStorage.
- */
+
+ 
+ 
+ 
 export async function deleteMyAccount(token) {
   const tk = token || getAuthToken()
   if (!tk) throw new Error('No token provided')
 
-  // ВАЖНО: у тебя префикс SINGULAR — /api/user/me (не /api/users/me)
+  
   const res = await fetch('/api/user/me', {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${tk}` },
@@ -29,5 +29,25 @@ export async function deleteMyAccount(token) {
   throw new Error(data.error || data.message || `Failed (${res.status})`)
 }
 
-// (опционально) сюда же можно добавить login/signup,
-// чтобы все запросы к бэку были в одном месте.
+export async function changeMyPassword(currentPassword, newPassword, token) {
+  const tk = token || (() => {
+    try { return JSON.parse(localStorage.getItem('auth'))?.token || '' } catch { return '' }
+  })();
+  if (!tk) throw new Error('No token provided');
+
+  const res = await fetch('/api/user/me/password', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${tk}`,
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  if (res.status === 204) return true;
+  const data = await res.json().catch(() => ({}));
+  throw new Error(data.error || data.message || `Failed (${res.status})`);
+}
+
+
+

@@ -19,16 +19,10 @@ const resources = {
         originalTitle: 'Alkuperäinen nimi',
         theater: 'Teatteri',
         dateAndTime: 'Päivä ja aika',
-        auditorium: 'Sali'
+        auditorium: 'Sali',
       },
       loadingShows: 'Haetaan näytöksiä...',
       noShowsAvailable: 'Ei näytöksiä saatavilla',
-
-      movie: 'Elokuva',
-      originalTitle: 'Alkuperäinen nimi',
-      theater: 'Teatteri',
-      dateAndTime: 'Päivä ja aika',
-      auditorium: 'Sali',
 
       signUp: 'Rekisteröidy',
       signup: 'Rekisteröidy',
@@ -70,18 +64,21 @@ const resources = {
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Ryhmä 13',
       footerFollowUs: 'Seuraa meitä',
+
       notFound: {
         title: '404',
         lead: 'Sivua ei löytynyt.',
-        backHome: 'Takaisin etusivulle'
+        backHome: 'Takaisin etusivulle',
       },
+
       searchPage: {
         title: 'Hakutulokset',
         termLabel: 'Hakusana',
         resultsSuffix: 'tulosta',
         noResults: 'Ei tuloksia. Kokeile toista hakusanaa.',
-        loading: 'Haetaan…'
+        loading: 'Haetaan…',
       },
+
       filters: {
         genre: 'Genre',
         minRating: 'Minimiarvio',
@@ -97,30 +94,53 @@ const resources = {
           ratingHigh: 'Arvostelu (korkein)',
           ratingLow: 'Arvostelu (matalin)',
           titleAZ: 'Nimi A-Ö',
-          popularity: 'Suosituimmat'
-        }
+          popularity: 'Suosituimmat',
+        },
       },
+
       pagination: {
         prev: 'Edellinen',
-        next: 'Seuraava'
+        next: 'Seuraava',
       },
+
       moviePage: {
         back: 'Takaisin',
         trailer: 'Katso traileri',
         overview: 'Yhteenveto',
         director: 'Ohjaaja',
         cast: 'Näyttelijät',
-        recommendations: 'Suositukset'
+        recommendations: 'Suositukset',
       },
 
-      // 🔽 добавлено для удаления аккаунта
+      // poistaminen
       account: {
         deleteBtn: 'Poista tili',
         deleting: 'Poistetaan…',
         confirmDelete: 'Haluatko varmasti poistaa tilin? Tätä toimintoa ei voi perua.',
-        deleted: 'Tili poistettu.'
-      }
-    }
+        deleted: 'Tili poistettu.',
+      },
+
+      // salasanan vaihto
+      changePassword: {
+        title: 'Vaihda salasana',
+        lead: 'Syötä nykyinen salasana ja uusi salasana.',
+        current: 'Nykyinen salasana',
+        new: 'Uusi salasana',
+        confirm: 'Vahvista uusi salasana',
+        hint: 'Vähintään 8 merkkiä, yksi iso kirjain ja yksi numero.',
+        saveBtn: 'Tallenna',
+        saving: 'Tallennetaan…',
+        success: 'Salasana vaihdettu. Kirjaudu sisään uudelleen.',
+        back: 'Takaisin omiin tietoihin',
+        go: 'Vaihda salasana',
+        errors: {
+          missing: 'Täytä kaikki kentät.',
+          mismatch: 'Salasanat eivät täsmää.',
+          sameAsOld: 'Uuden salasanan tulee erota nykyisestä.',
+          failed: 'Salasanan vaihto epäonnistui.',
+        },
+      },
+    },
   },
 
   en: {
@@ -140,24 +160,17 @@ const resources = {
         originalTitle: 'Original title',
         theater: 'Theater',
         dateAndTime: 'Date and time',
-        auditorium: 'Auditorium'
+        auditorium: 'Auditorium',
       },
       loadingShows: 'Loading shows...',
       noShowsAvailable: 'No shows available',
-
-      movie: 'Movie',
-      originalTitle: 'Original title',
-      theater: 'Theater',
-      dateAndTime: 'Date and time',
-      auditorium: 'Auditorium',
 
       login: 'Sign in',
       logout: 'Log out',
       signUp: 'Sign Up',
       signup: 'Sign Up',
       loginSuccess: 'Login successful!',
-      invalidPassword:
-        'The password must contain at least 8 characters, one uppercase letter and one number.',
+      invalidPassword: 'The password must contain at least 8 characters, one uppercase letter and one number.',
       invalidEmail: 'Email address is not valid.',
       missingFields: 'Enter email and password.',
       signupSuccess: 'Registration successful! You can now log in.',
@@ -192,18 +205,21 @@ const resources = {
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Team 13',
       footerFollowUs: 'Follow us',
+
       notFound: {
         title: '404',
         lead: 'Page not found.',
-        backHome: 'Back to home'
+        backHome: 'Back to home',
       },
+
       searchPage: {
         title: 'Search results',
         termLabel: 'Query',
         resultsSuffix: 'results',
         noResults: 'No results. Try another query.',
-        loading: 'Loading…'
+        loading: 'Loading…',
       },
+
       filters: {
         genre: 'Genre',
         minRating: 'Min rating',
@@ -219,34 +235,58 @@ const resources = {
           ratingHigh: 'Rating (high -> low)',
           ratingLow: 'Rating (low -> high)',
           titleAZ: 'Title A-Z',
-          popularity: 'Popularity'
-        }
+          popularity: 'Popularity',
+        },
       },
+
       pagination: {
         prev: 'Previous',
-        next: 'Next'
+        next: 'Next',
       },
+
       movie: {
-        noImage: 'No image'
+        noImage: 'No image',
       },
+
       moviePage: {
         back: 'Back',
         trailer: 'Watch trailer',
         overview: 'Overview',
         director: 'Director',
         cast: 'Cast',
-        recommendations: 'Recommendations'
+        recommendations: 'Recommendations',
       },
 
-      // 🔽 added for account deletion
+      // account deletion
       account: {
         deleteBtn: 'Delete account',
         deleting: 'Deleting…',
         confirmDelete: 'Are you sure you want to delete your account? This cannot be undone.',
-        deleted: 'Account deleted.'
-      }
-    }
-  }
+        deleted: 'Account deleted.',
+      },
+
+      // password change
+      changePassword: {
+        title: 'Change password',
+        lead: 'Enter your current and new password.',
+        current: 'Current password',
+        new: 'New password',
+        confirm: 'Confirm new password',
+        hint: 'At least 8 chars, one uppercase letter and one number.',
+        saveBtn: 'Save',
+        saving: 'Saving…',
+        success: 'Password changed. Please sign in again.',
+        back: 'Back to My account',
+        go: 'Change password',
+        errors: {
+          missing: 'Please fill in all fields.',
+          mismatch: 'Passwords do not match.',
+          sameAsOld: 'New password must differ from the current one.',
+          failed: 'Failed to change password.',
+        },
+      },
+    },
+  },
 }
 
 i18n
@@ -256,7 +296,7 @@ i18n
     lng: localStorage.getItem('lang') || 'fi',
     fallbackLng: 'fi',
     defaultNS: 'common',
-    interpolation: { escapeValue: false }
+    interpolation: { escapeValue: false },
   })
 
 export default i18n

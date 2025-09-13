@@ -1,4 +1,4 @@
-// src/context/UserProvider.jsx
+
 import { useEffect, useMemo, useState } from 'react'
 import { UserContext } from './UserContext'
 
@@ -25,6 +25,7 @@ export default function UserProvider({ children }) {
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || data.message || 'Login failed')
+
     const auth = { user: { id: data.id, email: data.email }, token: data.token }
     localStorage.setItem('auth', JSON.stringify(auth))
     setAuthUser(auth.user)
@@ -44,10 +45,12 @@ export default function UserProvider({ children }) {
     return data
   }
 
+  
   function signOut() {
-    localStorage.removeItem('auth')
+    try { localStorage.removeItem('auth') } catch {}
     setAuthUser(null)
     setToken(null)
+    setForm({ email: '', password: '' })
   }
 
   const isAuthenticated = useMemo(() => {
@@ -56,7 +59,19 @@ export default function UserProvider({ children }) {
   }, [token])
 
   return (
-    <UserContext.Provider value={{ user: form, setUser: setForm, authUser, token, isAuthenticated, signIn, signUp, signOut }}>
+    <UserContext.Provider
+      value={{
+        user: form,
+        setUser: setForm,
+        authUser,
+        token,
+        isAuthenticated,
+        signIn,
+        signUp,
+        signOut,
+        logout: signOut,    // ← на всякий случай алиас
+      }}
+    >
       {children}
     </UserContext.Provider>
   )

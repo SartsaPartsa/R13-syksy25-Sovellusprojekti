@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 const router = Router()
 const { sign, verify } = jwt
 
-// --- простая auth-мидлварь ---
+
 const auth = (req, res, next) => {
   const raw = req.headers.authorization || ''
   const token = raw.startsWith('Bearer ') ? raw.slice(7) : raw
@@ -20,11 +20,11 @@ const auth = (req, res, next) => {
   }
 }
 
-// --- валидация ---
+
 const isValidEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)
 const isStrongPassword = (pwd) => /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)
 
-// SIGNUP
+
 router.post('/signup', (req, res, next) => {
   const { user } = req.body
   if (!user?.email || !user?.password) {
@@ -44,14 +44,59 @@ router.post('/signup', (req, res, next) => {
       'INSERT INTO "user" (email, password_hash, created_at) VALUES ($1, $2, NOW()) RETURNING id, email',
       [user.email, hashed],
       (err, r) => {
-        if (err) return next(err)        // 23505 обработается в error handler'е
-        res.status(201).json(r.rows[0])  // { id, email }
+        if (err) return next(err)        
+        res.status(201).json(r.rows[0]) 
       }
     )
   })
 })
 
-// SIGNIN
+router.patch('/me/password', auth, async (req, res, next) => {
+  const userId = req.user?.id;
+  const { currentPassword, newPassword } = req.body || {};
+
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!currentPassword || !newPassword) {
+    const e = new Error('currentPassword and newPassword are required');
+    e.status = 400; return next(e);
+  }
+  if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(newPassword)) {
+    const e = new Error('Password must be at least 8 chars, include an uppercase letter and a number');
+    e.status = 400; return next(e);
+  }
+  if (currentPassword === newPassword) {
+    const e = new Error('New password must be different from current');
+    e.status = 400; return next(e);
+  }
+
+  try {
+    const r = await pool.query('SELECT password_hash FROM "user" WHERE id = $1', [userId]);
+    if (r.rows.length === 0) { const e = new Error('User not found'); e.status = 404; return next(e); }
+
+    const ok = await new Promise((resolve, reject) =>
+      compare(currentPassword, r.rows[0].password_hash, (err, ok2) => err ? reject(err) : resolve(ok2))
+    );
+    if (!ok) { const e = new Error('Current password is incorrect'); e.status = 401; return next(e); }
+
+    const hashed = await new Promise((resolve, reject) =>
+      hash(newPassword, 10, (err, h) => err ? reject(err) : resolve(h))
+    );
+
+    await pool.query(
+      'UPDATE "user" SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [hashed, userId]
+    );
+
+    return res.status(204).send();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+
+
+
+
 router.post('/signin', (req, res, next) => {
   const { user } = req.body
   if (!user?.email || !user?.password) {
@@ -67,14 +112,14 @@ router.post('/signin', (req, res, next) => {
       if (err) return next(err)
       if (!ok) { const e = new Error('Invalid password'); e.status = 401; return next(e) }
 
-      // Шьём токен с id + email (очень важно для /me)
+      
       const token = sign({ id: dbUser.id, email: dbUser.email }, process.env.JWT_SECRET, { expiresIn: '7d' })
       res.status(200).json({ id: dbUser.id, email: dbUser.email, token })
     })
   })
 })
 
-// DELETE /me — удалить текущего пользователя
+
 router.delete('/me', auth, async (req, res) => {
   const userId = req.user?.id
   if (!userId) return res.status(401).json({ error: 'Unauthorized' })
@@ -83,8 +128,7 @@ router.delete('/me', auth, async (req, res) => {
   try {
     await client.query('BEGIN')
 
-    // если нет ON DELETE CASCADE — удаляй связанные записи здесь
-    // await client.query('DELETE FROM favorites WHERE user_id = $1', [userId])
+    
 
     const { rowCount } = await client.query('DELETE FROM "user" WHERE id = $1', [userId])
     await client.query('COMMIT')
