@@ -13,11 +13,20 @@ import Search from './pages/Search.jsx'
 import MovieDetails from './pages/MovieDetails.jsx'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import ChangePassword from './pages/ChangePassword.jsx'
 
 export default function App() {
   return (
     <>
-     <ToastContainer position="top-center" autoClose={3000} />
+     <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        theme="dark"
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss={false}
+        limit={3}             
+      />
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<Home />} />
@@ -32,6 +41,7 @@ export default function App() {
           <Route path="favorites" element={<Favorites />} />
           <Route path="groups" element={<Groups />} />
           <Route path="account" element={<Account />} />
+          <Route path="account/password" element={<ChangePassword />} /> 
         </Route>
 
         <Route path="*" element={<NotFound />} />
