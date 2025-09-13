@@ -2,241 +2,229 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { XMLParser } from "fast-xml-parser";
 
-// Tämä on se osoite, mistä Finnkinon tiedot haetaan
+// Finnkinon rajapinnan perusosoite
 const FINNKINO_API = "https://www.finnkino.fi/xml";
 
-// Tähän on listattu kaupungit ja niissä olevat elokuvateatterit.
-// Jokaisella teatterilla on oma tunnusnumero (ID), jota käytetään hakemiseen.
-const THEATER_ID_MAP = {
-  "Helsinki": {
-    "TENNISPALATSI": "1033",
-    "KINOPALATSI": "1031",
-    "ITIS": "1045",
-    "MAXIM": "1032"
-  },
-  "Espoo": {
-    "OMENA": "1039",
-    "SELLO": "1038"
-  },
-  "Vantaa": {
-    "FLAMINGO": "1013"
-  },
-  "Jyväskylä": {
-    "FANTASIA": "1015"
-  },
-  "Kuopio": {
-    "SCALA": "1016"
-  },
-  "Lahti": {
-    "KUVAPALATSI": "1017"
-  },
-  "Lappeenranta": {
-    "STRAND": "1041"
-  },
-  "Oulu": {
-    "PLAZA": "1018"
-  },
-  "Pori": {
-    "PROMENADI": "1019"
-  },
-  "Tampere": {
-    "CINE ATLAS": "1034",
-    "PLEVNA": "1035"
-  },
-  "Turku": {
-    "KINOPALATSI": "1022"
-  },
-  "Raisio": {
-    "LUXE MYLLY": "1037"
-  }
-};
-
 export default function Theaters() {
-  // Tällä saadaan käännökset (tekstit voi olla suomeksi/englanniksi)
   const { t } = useTranslation("common");
 
-  // Tämä tallentaa sen mitä hakukenttään on kirjoitettu
+  // Käyttäjän hakusana teatterien suodattamiseen
   const [searchQuery, setSearchQuery] = useState("");
-  // Tämä muistaa mitkä kaupungit on klikattu auki (eli näkyykö sen teatterit)
+
+  // Mitkä kaupungit ovat auki (accordionin tila)
   const [openCities, setOpenCities] = useState([]);
-  // Tänne haetaan kaikki Finnkinon teatterit API:sta
+
+  // Lista teattereista (haetaan API:sta)
   const [theaters, setTheaters] = useState([]);
-  // Tänne talletetaan mikä teatteri on valittu
+
+  // Valittu teatteri (ID)
   const [selectedTheater, setSelectedTheater] = useState(null);
-  // Tänne talletetaan käyttäjän valitsema päivämäärä (jos ei valita, käytetään tämän päivän päivää)
+
+  // Valittu päivämäärä (muodossa dd.MM.yyyy)
   const [selectedDate, setSelectedDate] = useState("");
-  // Tänne haetaan näytökset valitusta teatterista ja päivämäärästä
+
+  // Valitun teatterin ja päivän näytökset
   const [shows, setShows] = useState([]);
-  // Tämä kertoo ollaanko juuri nyt hakemassa näytöksiä (true/false)
+
+  // Lataustilat
   const [loadingShows, setLoadingShows] = useState(false);
-  // Tänne tallennetaan mahdollinen virheilmoitus
-  const [error, setError] = useState(null);
-  // Tämä kertoo ollaanko juuri nyt hakemassa teattereita (true/false)
   const [loadingTheaters, setLoadingTheaters] = useState(true);
 
-  // Funktio, jolla avataan tai suljetaan kaupunki listasta
+  // Mahdollinen virheilmoitus
+  const [error, setError] = useState(null);
+
+  // Funktio: avaa/sulkee kaupungin listasta
   const toggleCity = (city) => {
-    setOpenCities(prev => 
-      prev.includes(city) 
-        ? prev.filter(c => c !== city) // Jos kaupunki oli jo auki → suljetaan
-        : [...prev, city]              // Jos kaupunki oli kiinni → avataan
+    setOpenCities((prev) =>
+      prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
     );
   };
 
-  // Tämä hakee Finnkinon API:sta kaikki teatterit, kun sivu ladataan
+  // 🔹 Haetaan teatterit API:sta, kun komponentti ladataan
   useEffect(() => {
     const fetchTheaters = async () => {
       try {
-        setLoadingTheaters(true); // Nyt ollaan lataustilassa
+        setLoadingTheaters(true); 
+
+        // Haetaan XML-data
         const response = await fetch(`${FINNKINO_API}/TheatreAreas/`);
-        const xmlData = await response.text(); // Vastauksena tulee XML-dataa
+        const xmlData = await response.text();
+
+        // Muutetaan XML → JSONiksi
         const parser = new XMLParser({ ignoreAttributes: false });
-        const jsonData = parser.parse(xmlData); // Muutetaan XML → JSON
+        const jsonData = parser.parse(xmlData);
 
-        // Otetaan listasta kaikki teatterit
+        // Haetaan lista kaikista teattereista
         let theaterList = jsonData.TheatreAreas.TheatreArea;
-        if (!Array.isArray(theaterList)) theaterList = [theaterList];
+        if (!Array.isArray(theaterList)) theaterList = [theaterList]; // jos tulee vain yksi teatteri, laitetaan se taulukoksi
 
-        // Tallennetaan teatterit tilaan (pois lukien turha "Valitse alue/teatteri")
-        setTheaters(
-          theaterList
-            .filter(theater => theater.Name !== "Valitse alue/teatteri")
-            .map((theater) => ({
-              id: theater.ID,
-              name: theater.Name,
-            }))
-        );
+        // Muokataan dataa:
+        const parsed = theaterList
+          .filter(
+            (theater) =>
+              theater.Name !== "Valitse alue/teatteri" && // poistetaan turha "Valitse alue"
+              theater.Name !== "Pääkaupunkiseutu" && // poistetaan kokonaan
+              theater.Name !== "Turku ja Raisio" // poistetaan yhdistelmä
+          )
+          .map((theater) => {
+            // Finnkino palauttaa esim. "Espoo: Sello"
+            const [city, ...rest] = theater.Name.split(":");
+            return {
+              id: theater.ID, // teatterin ID (tarvitaan ohjelmien hakuun)
+              city: city.trim(), // kaupunki (Espoo)
+              name: rest.length ? rest.join(":").trim() : "", // teatterin nimi (Sello)
+            };
+          })
+          .filter((t) => t.name !== ""); // poistetaan kaupungin omat napit (jos ei nimeä)
+
+        setTheaters(parsed); 
       } catch (err) {
         console.error("Error fetching theaters:", err);
-        setError(t("errorFetchingData")); // Näytetään virheilmoitus
+        setError(t("errorFetchingData"));
       } finally {
-        setLoadingTheaters(false); // Lataus valmis
+        setLoadingTheaters(false); 
       }
     };
+
     fetchTheaters();
   }, [t]);
 
-  // Tämä hakee näytökset kun käyttäjä valitsee teatterin tai päivämäärän
+  // 🔹 Haetaan näytökset, kun valittu teatteri tai päivämäärä muuttuu
   useEffect(() => {
-    if (!selectedTheater) return;
+    if (!selectedTheater) return; // jos ei ole teatteria → ei tehdä mitään
 
-    // Jos päivämäärää ei ole valittu, käytetään tämän päivän päivää
+    // Jos päivämäärää ei ole valittu → käytetään tämän päivän päivämäärää
     if (!selectedDate) {
       const today = new Date();
       const formattedToday = `${String(today.getDate()).padStart(2, "0")}.${String(
         today.getMonth() + 1
       ).padStart(2, "0")}.${today.getFullYear()}`;
       setSelectedDate(formattedToday);
-      return; 
+      return;
     }
 
-    // Haetaan näytökset API:sta
     const fetchShows = async () => {
       try {
-        setLoadingShows(true);
+        setLoadingShows(true); 
         setError(null);
 
+        // Haetaan valitun teatterin ja päivän ohjelma
         const response = await fetch(
           `${FINNKINO_API}/Schedule/?area=${selectedTheater}&dt=${selectedDate}`
         );
         const xmlData = await response.text();
+
+        // XML → JSON
         const parser = new XMLParser({ ignoreAttributes: false });
         const jsonData = parser.parse(xmlData);
 
-        // Otetaan kaikki näytökset listaan
-        let showList = jsonData.Schedule.Shows.Show;
+        // Otetaan näytökset listaksi
+        let showList = jsonData.Schedule.Shows?.Show || [];
         if (!Array.isArray(showList)) showList = [showList];
 
-        // Tallennetaan tarvittavat tiedot (elokuvan nimi, teatteri, kellonaika jne.)
+        // Muokataan näytöksistä käyttökelpoisia JS-objekteja
         setShows(
           showList.map((Show) => ({
-            Title: Show.Title,
-            OriginalTitle: Show.OriginalTitle,
-            ProductionYear: Show.ProductionYear,
-            dttmShowStart: Show.dttmShowStart,
-            TheatreAuditorium: Show.TheatreAuditorium,
-            Theatre: Show.Theatre,
-            TheatreID: Show.TheatreID,
-            Images: Show.Images ? Show.Images.EventSmallImagePortrait : null,
+            Title: Show.Title, // elokuvan nimi
+            OriginalTitle: Show.OriginalTitle, // alkuperäinen nimi
+            ProductionYear: Show.ProductionYear, // vuosiluku
+            dttmShowStart: Show.dttmShowStart, // aloitusaika
+            TheatreAuditorium: Show.TheatreAuditorium, // sali
+            Theatre: Show.Theatre, // teatteri
+            TheatreID: Show.TheatreID, // teatterin ID
+            EventID: Show.EventID, // elokuvan ID
+            Images: Show.Images ? Show.Images.EventSmallImagePortrait : null, // julistekuva
           }))
         );
       } catch (err) {
         console.error("Error fetching shows:", err);
-        setError(t("errorFetchingShows")); // Näytetään virheilmoitus
-        setShows([]); // Tyhjennetään lista
+        setError(t("errorFetchingShows"));
+        setShows([]);
       } finally {
-        setLoadingShows(false); // Lataus valmis
+        setLoadingShows(false);
       }
     };
 
     fetchShows();
   }, [selectedTheater, selectedDate, t]);
 
+  // 🔹 Ryhmitellään teatterit kaupunkien alle
+  const theatersByCity = theaters.reduce((acc, theater) => {
+    if (!acc[theater.city]) acc[theater.city] = [];
+    acc[theater.city].push(theater);
+    return acc;
+  }, {});
+
   return (
     <div className="bg-gray-800 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Jos teattereita ladataan → näytetään latausteksti */}
+        {/* Jos teatterit vielä latautuvat */}
         {loadingTheaters && <div className="text-white">{t("loading")}...</div>}
-        {/* Jos tuli virhe → näytetään virheilmoitus */}
+        {/* Jos tuli virhe */}
         {error && <div className="text-red-500">{error}</div>}
 
-        {/* Jos teatteria ei ole vielä valittu → näytetään lista kaupungeista */}
+        {/* Näytetään teatterilista jos mitään ei ole valittu */}
         {!selectedTheater && !loadingTheaters && (
           <div>
             <h2 className="text-4xl font-bold text-center my-8 text-white tracking-wide">
-              {t('chooseTheater')}
+              {t("chooseTheater")}
             </h2>
-            
+
             {/* Hakukenttä */}
             <div className="max-w-3xl mx-auto p-5">
               <input
                 type="text"
-                placeholder={t('searchTheaters', { en: 'Search theaters', fi: 'Hae teattereita' })}
+                placeholder={t("searchTheaters", {
+                  en: "Search theaters",
+                  fi: "Hae teattereita",
+                })}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full p-3 mb-6 rounded-lg border border-gray-300 text-lg"
               />
-              
-              {/* Käydään läpi kaikki kaupungit ja niiden teatterit */}
-              {Object.entries(THEATER_ID_MAP).map(([city, theaters]) => {
-                // Suodatetaan hakukentän perusteella
-                const theatersArray = Object.entries(theaters)
-                  .filter(([name]) => 
-                    name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+
+              {/* Käydään läpi kaupungit ja niiden teatterit */}
+              {Object.entries(theatersByCity).map(([city, cityTheaters]) => {
+                // Suodatetaan hakusanan mukaan
+                const filtered = cityTheaters.filter(
+                  (theater) =>
+                    theater.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()) ||
                     city.toLowerCase().includes(searchQuery.toLowerCase())
-                  );
-                
-                if (theatersArray.length === 0) return null;
-                
-                // Onko kaupunki klikattu auki
+                );
+                if (filtered.length === 0) return null;
+
+                // Onko kaupunki auki?
                 const isOpen = openCities.includes(city);
-                
+
                 return (
                   <div key={city} className="mb-4">
-                    {/* Kaupungin nimi (klikkaamalla avaa/sulkee) */}
+                    {/* Kaupungin nappi */}
                     <button
                       onClick={() => toggleCity(city)}
                       className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-colors duration-200 rounded-lg flex items-center justify-between group"
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-white text-xl">{city}</span>
-                      </div>
-                      {/* Nuoli joka pyörähtää kun kaupunki auki */}
-                      <span className={`text-[#FF8C00] transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                      <span className="text-white text-xl">{city}</span>
+                      <span
+                        className={`text-[#FF8C00] transform transition-transform duration-200 ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      >
                         ▼
                       </span>
                     </button>
-                    
-                    {/* Näytetään teatterit vain jos kaupunki on auki */}
+
+                    {/* Teatterilista */}
                     {isOpen && (
                       <div className="mt-2 pl-8 pb-2 flex flex-wrap gap-3">
-                        {theatersArray.map(([name, id]) => (
+                        {filtered.map((theater) => (
                           <button
-                            key={id}
-                            onClick={() => setSelectedTheater(id)}
+                            key={theater.id}
+                            onClick={() => setSelectedTheater(theater.id)}
                             className="px-5 py-3 rounded-lg border border-[#FF8C00] bg-[#FF8C00] text-black hover:bg-[#E67E00] transition-colors duration-200"
                           >
-                            {name}
+                            {theater.name}
                           </button>
                         ))}
                       </div>
@@ -248,26 +236,38 @@ export default function Theaters() {
           </div>
         )}
 
-        {/* Jos teatteri on valittu → näytetään näytökset */}
+        {/* Jos teatteri on valittu → näytökset */}
         {selectedTheater && (
           <div className="max-w-6xl mx-auto p-5">
             <div className="flex items-center gap-4 mb-6">
               {/* Takaisin teatterilistaan */}
-              <button 
-                onClick={() => { setSelectedTheater(null); setShows([]); setSelectedDate(""); }}
+              <button
+                onClick={() => {
+                  setSelectedTheater(null);
+                  setShows([]);
+                  setSelectedDate("");
+                }}
                 className="px-5 py-2 rounded-lg bg-[#FF8C00] text-black hover:bg-[#E67E00] transition-colors duration-200"
               >
-                {t('backToTheaters')}
+                {t("backToTheaters")}
               </button>
 
               {/* Päivämäärän valinta */}
               <div className="flex items-center gap-3">
-                <label className="text-white font-medium">{t('selectDate')}: </label>
+                <label className="text-white font-medium">
+                  {t("selectDate")}:
+                </label>
                 <input
                   type="date"
-                  value={selectedDate ? selectedDate.split(".").reverse().join("-") : ""}
+                  value={
+                    selectedDate
+                      ? selectedDate.split(".").reverse().join("-")
+                      : ""
+                  }
                   onChange={(e) => {
+                    // input antaa päivämäärän muodossa YYYY-MM-DD
                     const [y, m, d] = e.target.value.split("-");
+                    // muutetaan muotoon dd.MM.yyyy (API vaatii tätä)
                     setSelectedDate(`${d}.${m}.${y}`);
                   }}
                   className="px-3 py-2 rounded-lg border border-[#FF8C00] bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#FF8C00] focus:border-[#FF8C00]"
@@ -275,49 +275,73 @@ export default function Theaters() {
               </div>
             </div>
 
-            {/* Jos ladataan näytöksiä → näytetään latausteksti */}
-            {loadingShows && <div className="text-white">{t("loadingShows")}...</div>}
+            {/* Näytökset */}
+            {loadingShows && (
+              <div className="text-white">{t("loadingShows")}...</div>
+            )}
 
-            {/* Jos näytöksiä löytyi → näytetään taulukossa */}
             {!loadingShows && shows.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-[#FF8C00]">
-                      <th className="p-4 text-left text-black font-bold">{t('showTable.movie')}</th>
-                      <th className="p-4 text-left text-black font-bold">{t('showTable.originalTitle')}</th>
-                      <th className="p-4 text-left text-black font-bold">{t('showTable.theater')}</th>
-                      <th className="p-4 text-left text-black font-bold">{t('showTable.dateAndTime')}</th>
-                      <th className="p-4 text-center text-black font-bold">{t('showTable.auditorium')}</th>
+                      <th className="p-4 text-left text-black font-bold">
+                        {t("showTable.movie")}
+                      </th>
+                      <th className="p-4 text-left text-black font-bold">
+                        {t("showTable.originalTitle")}
+                      </th>
+                      <th className="p-4 text-left text-black font-bold">
+                        {t("showTable.theater")}
+                      </th>
+                      <th className="p-4 text-left text-black font-bold">
+                        {t("showTable.dateAndTime")}
+                      </th>
+                      <th className="p-4 text-center text-black font-bold">
+                        {t("showTable.auditorium")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-gray-900">
                     {shows.map((show, idx) => (
-                      <tr 
-                        key={idx} 
+                      <tr
+                        key={idx}
                         className="border-b border-gray-800 hover:bg-gray-800 transition-colors duration-200"
                       >
-                        {/* Elokuvan nimi + kuva */}
+                        {/* Elokuvan nimi ja kuva */}
                         <td className="p-4">
                           <div className="flex items-center gap-4">
                             {show.Images && (
-                              <img 
-                                src={show.Images} 
-                                alt={show.Title} 
+                              <img
+                                src={show.Images}
+                                alt={show.Title}
                                 className="w-12 h-18 object-cover rounded"
                               />
                             )}
-                            <span className="text-white">{show.Title}</span>
+                            <a
+                              href={`https://www.finnkino.fi/event/${
+                                show.EventID
+                              }/title/${show.Title.toLowerCase()
+                                .replace(/[åäö]/g, "a")
+                                .replace(/[^a-z0-9]+/g, "-")}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-white hover:text-[#FF8C00] hover:underline"
+                            >
+                              {show.Title}
+                            </a>
                           </div>
                         </td>
-                        <td className="p-4 text-gray-400">{show.OriginalTitle}</td>
+                        <td className="p-4 text-gray-400">
+                          {show.OriginalTitle}
+                        </td>
                         <td className="p-4">
                           <span className="text-[#FF8C00] hover:underline cursor-pointer">
                             {show.Theatre}
                           </span>
                         </td>
                         <td className="p-4 text-white">
-                          {new Date(show.dttmShowStart).toLocaleString('fi-FI')}
+                          {new Date(show.dttmShowStart).toLocaleString("fi-FI")}
                         </td>
                         <td className="p-4 text-center font-medium text-white">
                           {show.TheatreAuditorium}
@@ -332,7 +356,9 @@ export default function Theaters() {
             {/* Jos ei löytynyt yhtään näytöstä */}
             {!loadingShows && shows.length === 0 && (
               <div className="text-center p-8 bg-gray-900 rounded-lg border border-[#FF8C00]">
-                <p className="text-white text-lg">{t("noShowsAvailable")}</p>
+                <p className="text-white text-lg">
+                  {t("noShowsAvailable")}
+                </p>
               </div>
             )}
           </div>
