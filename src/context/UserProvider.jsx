@@ -1,46 +1,62 @@
-import { useMemo, useState } from 'react'
+// src/context/UserProvider.jsx
+import { useEffect, useMemo, useState } from 'react'
 import { UserContext } from './UserContext'
-import axios from 'axios'
 
 export default function UserProvider({ children }) {
-  const userFromStorage = sessionStorage.getItem('user')
-  const [user, setUser] = useState(
-    userFromStorage ? JSON.parse(userFromStorage) : { email: '', password: '' }
-  )
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [authUser, setAuthUser] = useState(null)
+  const [token, setToken] = useState(null)
 
-  const signUp = async () => {
-    const headers = { headers: { 'Content-Type': 'application/json' } }
-    await axios.post(
-      `${import.meta.env.VITE_API_URL}/user/signup`,
-      JSON.stringify({ user }),
-      headers
-    )
-    setUser({ email: '', password: '' })
+  useEffect(() => {
+    try {
+      const a = JSON.parse(localStorage.getItem('auth'))
+      if (a?.user && a?.token) {
+        setAuthUser(a.user)
+        setToken(a.token)
+      }
+    } catch {}
+  }, [])
+
+  async function signIn(email, password) {
+    const res = await fetch('/api/user/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: { email, password } }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || data.message || 'Login failed')
+    const auth = { user: { id: data.id, email: data.email }, token: data.token }
+    localStorage.setItem('auth', JSON.stringify(auth))
+    setAuthUser(auth.user)
+    setToken(auth.token)
+    return auth
   }
 
-  const signIn = async (email, password) => {
-    const headers = { headers: { 'Content-Type': 'application/json' } }
-    const body = JSON.stringify({ user: { email, password } })
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/user/signin`,
-      body,
-      headers
-    )
-    setUser(response.data)
-    sessionStorage.setItem('user', JSON.stringify(response.data))
+  async function signUp() {
+    const { email, password } = form
+    const res = await fetch('/api/user/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: { email, password } }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || data.message || 'Signup failed')
+    return data
   }
 
-  const logout = () => {
-    sessionStorage.removeItem('user')
-    setUser({ email: '', password: '' })
+  function signOut() {
+    localStorage.removeItem('auth')
+    setAuthUser(null)
+    setToken(null)
   }
 
   const isAuthenticated = useMemo(() => {
-    return !!(user && user.token)
-  }, [user])
+    if (token) return true
+    try { return Boolean(JSON.parse(localStorage.getItem('auth'))?.token) } catch { return false }
+  }, [token])
 
   return (
-    <UserContext.Provider value={{ user, setUser, signUp, signIn, logout, isAuthenticated }}>
+    <UserContext.Provider value={{ user: form, setUser: setForm, authUser, token, isAuthenticated, signIn, signUp, signOut }}>
       {children}
     </UserContext.Provider>
   )

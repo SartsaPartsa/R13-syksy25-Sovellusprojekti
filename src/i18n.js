@@ -1,6 +1,6 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import { toast } from 'react-toastify'
+
 const resources = {
   fi: {
     common: {
@@ -23,38 +23,41 @@ const resources = {
       },
       loadingShows: 'Haetaan näytöksiä...',
       noShowsAvailable: 'Ei näytöksiä saatavilla',
+
       movie: 'Elokuva',
       originalTitle: 'Alkuperäinen nimi',
       theater: 'Teatteri',
       dateAndTime: 'Päivä ja aika',
       auditorium: 'Sali',
+
       signUp: 'Rekisteröidy',
-      signup:'Rekisteröidy',
+      signup: 'Rekisteröidy',
       login: 'Kirjaudu sisään',
       loginlead: 'Kirjaudu sisään jatkaaksesi',
       loginSuccess: 'Kirjautuminen onnistui!',
-      signupSuccess: "Rekisteröityminen onnistui! Nyt voit kirjautua sisään.",
-      authFailed: "Kirjautuminen epäonnistui, yritä uudelleen.",
-      invalidPassword:'Salasanassa pitää olla vähintään 8 merkkiä, yksi iso kirjain ja yksi numero.',
-      invalidEmail:'Sähköpostiosoite ei ole kelvollinen.',
-      missingFields:'Syötä sähköposti ja salasana.',
-      signupFailed:'Rekisteröityminen epäonnistui. Tarkista tiedot.',
-      logout:'Kirjaudu ulos',
-      favorites: "Suosikit",
-      groups: "Ryhmät",
-      myAccount: "Omat tiedot",
+      signupSuccess: 'Rekisteröityminen onnistui! Nyt voit kirjautua sisään.',
+      authFailed: 'Kirjautuminen epäonnistui, yritä uudelleen.',
+      invalidPassword: 'Salasanassa pitää olla vähintään 8 merkkiä, yksi iso kirjain ja yksi numero.',
+      invalidEmail: 'Sähköpostiosoite ei ole kelvollinen.',
+      missingFields: 'Syötä sähköposti ja salasana.',
+      signupFailed: 'Rekisteröityminen epäonnistui. Tarkista tiedot.',
+      logout: 'Kirjaudu ulos',
+      favorites: 'Suosikit',
+      groups: 'Ryhmät',
+      myAccount: 'Omat tiedot',
       signuplead: 'Rekisteröidy jatkaaksesi',
       email: 'Sähköposti',
-      submit:'Rekisteröidy',
+      submit: 'Rekisteröidy',
       password: 'Salasana',
-      noAccount: "Ei tiliä? Rekisteröidy",
-      alreadySignup: "Onko sinulla tili? Kirjaudu sisään",
+      noAccount: 'Ei tiliä? Rekisteröidy',
+      alreadySignup: 'Onko sinulla tili? Kirjaudu sisään',
       chooseTheater: 'Valitse teatteri',
       searchTheaters: 'Hae teattereita',
       langFi: 'Suomi',
       langEn: 'Englanti',
       title: 'Tervetuloa Movie Appiin!',
-      subtitle: 'Elokuvaharrastajien oma yhteisö - löydä elokuvat, tarkasta näytösajat, kirjoita arvosteluja ja jaa suosikkisi muiden kanssa.',
+      subtitle:
+        'Elokuvaharrastajien oma yhteisö - löydä elokuvat, tarkasta näytösajat, kirjoita arvosteluja ja jaa suosikkisi muiden kanssa.',
       introTitle: 'Päivän leffa',
       introLead: 'John Wick',
       showsTitle: 'Näytökset',
@@ -68,16 +71,16 @@ const resources = {
       footerTeamR13: 'Ryhmä 13',
       footerFollowUs: 'Seuraa meitä',
       notFound: {
-        title: "404",
+        title: '404',
         lead: 'Sivua ei löytynyt.',
-        backHome: 'Takaisin etusivulle',
+        backHome: 'Takaisin etusivulle'
       },
       searchPage: {
         title: 'Hakutulokset',
         termLabel: 'Hakusana',
         resultsSuffix: 'tulosta',
         noResults: 'Ei tuloksia. Kokeile toista hakusanaa.',
-        loading: 'Haetaan…',
+        loading: 'Haetaan…'
       },
       filters: {
         genre: 'Genre',
@@ -94,15 +97,12 @@ const resources = {
           ratingHigh: 'Arvostelu (korkein)',
           ratingLow: 'Arvostelu (matalin)',
           titleAZ: 'Nimi A-Ö',
-          popularity: 'Suosituimmat',
-        },
+          popularity: 'Suosituimmat'
+        }
       },
       pagination: {
         prev: 'Edellinen',
-        next: 'Seuraava',
-      },
-      movie: {
-        noImage: 'Ei kuvaa',
+        next: 'Seuraava'
       },
       moviePage: {
         back: 'Takaisin',
@@ -110,10 +110,19 @@ const resources = {
         overview: 'Yhteenveto',
         director: 'Ohjaaja',
         cast: 'Näyttelijät',
-        recommendations: 'Suositukset',
+        recommendations: 'Suositukset'
       },
-    },
+
+      // 🔽 добавлено для удаления аккаунта
+      account: {
+        deleteBtn: 'Poista tili',
+        deleting: 'Poistetaan…',
+        confirmDelete: 'Haluatko varmasti poistaa tilin? Tätä toimintoa ei voi perua.',
+        deleted: 'Tili poistettu.'
+      }
+    }
   },
+
   en: {
     common: {
       appName: 'Movie App',
@@ -135,30 +144,33 @@ const resources = {
       },
       loadingShows: 'Loading shows...',
       noShowsAvailable: 'No shows available',
+
       movie: 'Movie',
       originalTitle: 'Original title',
       theater: 'Theater',
       dateAndTime: 'Date and time',
       auditorium: 'Auditorium',
+
       login: 'Sign in',
-      logout:'Log out',
+      logout: 'Log out',
       signUp: 'Sign Up',
-      signup:'Sign Up',
+      signup: 'Sign Up',
       loginSuccess: 'Login successful!',
-      invalidPassword:'The password must contain at least 8 characters, one uppercase letter and one number.',
-      invalidEmail:'Email address is not valid.',
-      missingFields:'Enter email and password.',
+      invalidPassword:
+        'The password must contain at least 8 characters, one uppercase letter and one number.',
+      invalidEmail: 'Email address is not valid.',
+      missingFields: 'Enter email and password.',
       signupSuccess: 'Registration successful! You can now log in.',
       authFailed: 'Login failed,try again.',
-      signupFailed:'Registration failed. Please check your details.',
-      favorites: "Favorites",
-      groups: "Groups",
-      myAccount: "My account",
-      email:'Email',
-      submit:'vahvista',
-      password:'Password',
-      noAccount: "No account? Sign up",
-      alreadySignup:"Already sign up? Sign in",
+      signupFailed: 'Registration failed. Please check your details.',
+      favorites: 'Favorites',
+      groups: 'Groups',
+      myAccount: 'My account',
+      email: 'Email',
+      submit: 'Confirm',
+      password: 'Password',
+      noAccount: 'No account? Sign up',
+      alreadySignup: 'Already sign up? Sign in',
       loginlead: 'Sign in to continue',
       signuplead: 'Sign up to continue',
       chooseTheater: 'Choose theater',
@@ -166,7 +178,8 @@ const resources = {
       langFi: 'Finnish',
       langEn: 'English',
       title: 'Welcome to Movie App!',
-      subtitle: 'The community for movie enthusiasts - discover movies, check showtimes, write reviews, and share your favorites with others.',
+      subtitle:
+        'The community for movie enthusiasts - discover movies, check showtimes, write reviews, and share your favorites with others.',
       introTitle: 'Movie Of The Day',
       introLead: 'John Wick',
       showsTitle: 'Showtimes',
@@ -180,16 +193,16 @@ const resources = {
       footerTeamR13: 'Team 13',
       footerFollowUs: 'Follow us',
       notFound: {
-        title: "404",
+        title: '404',
         lead: 'Page not found.',
-        backHome: 'Back to home',
+        backHome: 'Back to home'
       },
       searchPage: {
         title: 'Search results',
         termLabel: 'Query',
         resultsSuffix: 'results',
         noResults: 'No results. Try another query.',
-        loading: 'Loading…',
+        loading: 'Loading…'
       },
       filters: {
         genre: 'Genre',
@@ -206,15 +219,15 @@ const resources = {
           ratingHigh: 'Rating (high -> low)',
           ratingLow: 'Rating (low -> high)',
           titleAZ: 'Title A-Z',
-          popularity: 'Popularity',
-        },
+          popularity: 'Popularity'
+        }
       },
       pagination: {
         prev: 'Previous',
-        next: 'Next',
+        next: 'Next'
       },
       movie: {
-        noImage: 'No image',
+        noImage: 'No image'
       },
       moviePage: {
         back: 'Back',
@@ -222,10 +235,18 @@ const resources = {
         overview: 'Overview',
         director: 'Director',
         cast: 'Cast',
-        recommendations: 'Recommendations',
+        recommendations: 'Recommendations'
       },
-    },
-  },
+
+      // 🔽 added for account deletion
+      account: {
+        deleteBtn: 'Delete account',
+        deleting: 'Deleting…',
+        confirmDelete: 'Are you sure you want to delete your account? This cannot be undone.',
+        deleted: 'Account deleted.'
+      }
+    }
+  }
 }
 
 i18n
@@ -235,7 +256,7 @@ i18n
     lng: localStorage.getItem('lang') || 'fi',
     fallbackLng: 'fi',
     defaultNS: 'common',
-    interpolation: { escapeValue: false },
+    interpolation: { escapeValue: false }
   })
 
 export default i18n
