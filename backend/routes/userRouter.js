@@ -144,4 +144,26 @@ router.delete('/me', auth, async (req, res) => {
   }
 })
 
+// backend/routes/userRouter.js
+router.get('/profile', auth, async (req, res) => {
+  console.log('[GET /api/user/profile] req.user =', req.user); 
+
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const r = await pool.query(
+    'SELECT id, email, created_at, updated_at FROM "user" WHERE id = $1',
+    [userId]
+  );
+
+  if (r.rows.length === 0) {
+    console.log('[GET /api/user/me] not found id=', userId);
+    
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  return res.status(200).json(r.rows[0]);
+});
+
+
 export default router
