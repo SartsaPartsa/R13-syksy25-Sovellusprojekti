@@ -103,8 +103,8 @@ function FancySelect({ value, onChange, options, placeholder, className = '', al
 // Navigation links always visible
 const LINKS = [
   { to: '/', key: 'home' },
-  { to: '/movies', key: 'movies' },
   { to: '/theaters', key: 'theaters' },
+  { to: '/reviews', key: 'reviews' },
 ]
 
 // Links visible only when user is logged in
@@ -209,7 +209,7 @@ export function Navbar() {
           // Remove any API placeholder entries in any language (Finnish/English)
           .filter(x => !/valitse\s+alue\/?teatteri/i.test(x.name) && !/choose\s+area\/?theater/i.test(x.name))
         setTheaters(list)
-      } catch (e) {
+  } catch {
         // silent fail in navbar (user can still use Theaters page)
       } finally {
         if (!aborted) setTheatersLoading(false)
@@ -226,7 +226,10 @@ export function Navbar() {
     if (area !== selectedTheater) setSelectedTheater(area)
   }, [location.search])
 
-  const theaterOptions = theaters.map(t => ({ value: t.id, label: t.name }))
+  // Show nicer theater labels (e.g., remove "(pl. Espoo)" from Helsinki area)
+  const cleanTheaterName = (name) =>
+    name?.replace(/\s*\((?:pl\.?|excl\.?)\s*Espoo\)\s*$/i, '') || ''
+  const theaterOptions = theaters.map(t => ({ value: t.id, label: cleanTheaterName(t.name) }))
 
   function onSelectTheater(id) {
     setSelectedTheater(id)
