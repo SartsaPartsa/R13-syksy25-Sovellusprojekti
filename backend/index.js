@@ -5,6 +5,7 @@ import userRouter from './routes/userRouter.js'
 import searchRouter from './routes/searchRouter.js';
 import movieRouter from './routes/movieRouter.js'
 import groupRouter from './routes/groupRouter.js'
+import reviewsRouter from './routes/reviewRouter.js'
 
 dotenv.config()
 
@@ -16,6 +17,7 @@ app.use('/api/user', userRouter)
 app.use('/api/search', searchRouter);
 app.use('/api/movies', movieRouter)
 app.use('/api/groups', groupRouter)
+app.use('/api/reviews',reviewRouter)
 
 app.use((err, req, res, next) => {
   if (err?.code === '23505') {
