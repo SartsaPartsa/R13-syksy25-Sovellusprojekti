@@ -17,7 +17,7 @@ app.use('/api/user', userRouter)
 app.use('/api/search', searchRouter);
 app.use('/api/movies', movieRouter)
 app.use('/api/groups', groupRouter)
-app.use('/api/reviews',reviewRouter)
+app.use('/api/reviews', reviewsRouter)
 
 app.use((err, req, res, next) => {
   if (err?.code === '23505') {
