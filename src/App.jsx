@@ -37,11 +37,11 @@ export default function App() {
         <Route path="theaters" element={<Theaters />} />
         <Route path="/search" element={<Search />} />
         <Route path="/movies/:id" element={<MovieDetails />} />
+        <Route path="groups" element={<Groups />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="favorites" element={<Favorites />} />
-          <Route path="groups" element={<Groups />} />
           <Route path="/groups/:id" element={<GroupPage />} />
           <Route path="account" element={<Account />} />
           <Route path="account/password" element={<ChangePassword />} /> 
