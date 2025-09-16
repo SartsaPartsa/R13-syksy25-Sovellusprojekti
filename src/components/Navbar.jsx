@@ -2,122 +2,29 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useUser } from '../context/useUser'
+import FancySelect from './FancySelect'
 
-// FancySelect: lightweight custom dropdown with keyboard and outside-click handling
-function FancySelect({ value, onChange, options, placeholder, className = '', align = 'right' }) {
-  const [open, setOpen] = useState(false)
-  const btnRef = useRef(null)
-  const panelRef = useRef(null)
-
-  const selected = options.find((o) => o.value === value)
-  const label = selected?.label || placeholder || ''
-
-  // Close dropdown when clicking outside or pressing Escape
-  useEffect(() => {
-    if (!open) return
-    const handler = (e) => {
-      const t = e.target
-      if (
-        panelRef.current &&
-        !panelRef.current.contains(t) &&
-        !(btnRef.current && btnRef.current.contains(t))
-      ) {
-        setOpen(false)
-      }
-    }
-    const onKey = (e) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    document.addEventListener('touchstart', handler)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', handler)
-      document.removeEventListener('touchstart', handler)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
-
-  // Render trigger button and options panel
-  return (
-    <div className={`relative ${className}`}>
-      <button
-        type="button"
-        ref={btnRef}
-        onClick={() => setOpen((v) => !v)}
-        className="h-10 inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 pr-8 text-sm text-white ring-1 ring-white/10 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#F18800]"
-      >
-        <span className="truncate max-w-[11rem]">{label}</span>
-        <svg
-          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.17l3.71-2.94a.75.75 0 1 1 .94 1.16l-4.24 3.36a.75.75 0 0 1-.94 0L5.21 8.39a.75.75 0 0 1 .02-1.18z" />
-        </svg>
-      </button>
-
-      {open && (
-        <div
-          ref={panelRef}
-          className={`absolute z-50 mt-2 top-full ${
-            align === 'right' ? 'right-0' : 'left-0'
-          } min-w-[14rem] bg-gray-900/95 backdrop-blur-md border border-white/10 rounded-lg shadow-lg p-1`}
-        >
-          <ul className="max-h-60 overflow-auto">
-            {options.map((o) => {
-              const active = o.value === value
-              return (
-                <li key={o.value}>
-                  <button
-                    type="button"
-                    className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                      active ? 'bg-white/10 text-white' : 'text-gray-200 hover:bg-white/5'
-                    }`}
-                    onClick={() => {
-                      onChange?.(o.value)
-                      setOpen(false)
-                    }}
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      {active && (
-                        <svg className="h-4 w-4 text-[#F18800]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.07 7.07a1 1 0 0 1-1.415 0L3.29 9.838a1 1 0 1 1 1.415-1.415l3.239 3.239 6.364-6.364a1 1 0 0 1 1.396-.008z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                      <span className="truncate">{o.label}</span>
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-}
+// Navbar: responsive top bar with navigation, search, language and theater pickers
 
 // Navigation links used by both desktop and mobile menus
 // Navigation links always visible
 const LINKS = [
   { to: '/', key: 'home' },
-  { to: '/movies', key: 'movies' },
   { to: '/theaters', key: 'theaters' },
+  { to: '/reviews', key: 'reviews' },
+  { to: '/groups', key: 'groups' },
 ]
 
 // Links visible only when user is logged in
 const AUTH_LINKS = [
   { to: '/favorites', key: 'favorites' },
-  { to: '/groups', key: 'groups' },
   { to: '/account', key: 'myAccount' },
 ]
 
 // Navbar: responsive top navigation with search, language and theater selectors
 export function Navbar() {
-  const [open, setOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
+  const [open, setOpen] = useState(false) // mobile menu
+  const [searchOpen, setSearchOpen] = useState(false) // floating search panel
   const searchPanelRef = useRef(null)
   const searchBtnDesktopRef = useRef(null)
   const searchBtnMobileRef = useRef(null)
@@ -135,16 +42,18 @@ export function Navbar() {
   const [theatersLoading, setTheatersLoading] = useState(false)
   const [selectedTheater, setSelectedTheater] = useState('')
 
-  // Sync userLoggedIn state with authentication context (reacts to login/logout)
+  // Keep login state in sync with auth context
   useEffect(() => { 
     setUserLoggedIn(isAuthenticated) 
   }, [isAuthenticated])
 
-  // Logout-function
+  // Logout and redirect to home
    function logout() {
      ctxLogout()
      navigate('/')
    }
+
+  // Perform global search and close popovers
   function submitSearch() {
     const q = term.trim()
     if (!q) return
@@ -154,11 +63,13 @@ export function Navbar() {
     setOpen(false)
   }
 
+  // Change UI language
   const changeLang = (lng) => {
     i18n.changeLanguage(lng)
     try { localStorage.setItem('lang', lng) } catch {}
   }
 
+  // Global keyboard/resize handlers
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') { setOpen(false); setSearchOpen(false) }
@@ -172,6 +83,7 @@ export function Navbar() {
     }
   }, [])
 
+  // Close floating search when clicking outside
   useEffect(() => {
     if (!searchOpen) return
     const handler = (e) => {
@@ -206,11 +118,11 @@ export function Navbar() {
         const list = nodes
           .map(n => ({ id: n.getElementsByTagName('ID')[0]?.textContent, name: n.getElementsByTagName('Name')[0]?.textContent }))
           .filter(x => x.id && x.name && x.id !== '-1')
-          // Remove any API placeholder entries in any language (Finnish/English)
+          // Remove placeholder entries (Finnish/English)
           .filter(x => !/valitse\s+alue\/?teatteri/i.test(x.name) && !/choose\s+area\/?theater/i.test(x.name))
         setTheaters(list)
-      } catch (e) {
-        // silent fail in navbar (user can still use Theaters page)
+  } catch {
+        // Silent in navbar; Theaters page remains usable
       } finally {
         if (!aborted) setTheatersLoading(false)
       }
@@ -219,15 +131,19 @@ export function Navbar() {
     return () => { aborted = true }
   }, [])
 
-  // Sync selected theater with URL param if on /theaters
+  // Sync selected theater with URL param
   useEffect(() => {
     const sp = new URLSearchParams(location.search)
     const area = sp.get('area') || ''
     if (area !== selectedTheater) setSelectedTheater(area)
   }, [location.search])
 
-  const theaterOptions = theaters.map(t => ({ value: t.id, label: t.name }))
+  // Pretty theater names
+  const cleanTheaterName = (name) =>
+    name?.replace(/\s*\((?:pl\.?|excl\.?)\s*Espoo\)\s*$/i, '') || ''
+  const theaterOptions = theaters.map(t => ({ value: t.id, label: cleanTheaterName(t.name) }))
 
+  // Navigate to theater page on select
   function onSelectTheater(id) {
     setSelectedTheater(id)
     navigate(`/theaters?area=${encodeURIComponent(id)}`)
@@ -236,7 +152,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-gray-900/90 backdrop-blur relative">
       <nav className="flex h-16 w-full items-center justify-between px-4 md:px-8 max-w-7xl mx-auto relative">
-        {/* Logo + app name = Link */}
+        {/* App logo/title */}
         <Link
           to="/"
           className="group inline-flex items-center gap-3"
@@ -249,7 +165,7 @@ export function Navbar() {
           <span className="text-lg font-semibold tracking-tight text-white">{t('appName')}</span>
         </Link>
 
-        {/* Desktop links */}
+        {/* Desktop navigation + actions */}
         <div className="hidden md:flex items-center">
           <ul className="flex list-none items-center gap-1 mr-3">
             {visibleLinks.map(l => (
@@ -271,22 +187,24 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-3">
-            {/* Theater quick select */}
+            {/* Theater select (shared FancySelect) */}
             <FancySelect
               value={selectedTheater}
               onChange={onSelectTheater}
               placeholder={theatersLoading ? '…' : t('chooseTheater')}
               options={theaterOptions}
               align="left"
+              labelClassName="truncate max-w-[11rem]"
             />
-            {/* Language */}
+            {/* Language (shared FancySelect) */}
             <FancySelect
               value={i18n.language}
               onChange={(lng) => changeLang(lng)}
               options={[{ value: 'fi', label: 'FIN' }, { value: 'en', label: 'ENG' }]}
+              labelClassName="truncate max-w-[11rem]"
             />
 
-            {/* Login */}
+            {/* Auth button */}
               {userLoggedIn ? (
                 <button
                   type="button"
@@ -319,7 +237,7 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile: search + hamburger */}
+        {/* Mobile: search button + burger */}
         <div className="md:hidden flex items-center gap-1">
           <button
             type="button"
@@ -387,7 +305,7 @@ export function Navbar() {
         )}
       </nav>
 
-      {/* Mobile dropdown */}
+      {/* Mobile dropdown panel */}
       <div className={`md:hidden absolute inset-x-0 top-16 bg-gray-900/98 backdrop-blur-xl backdrop-saturate-200 shadow-lg border-b border-white/10 ${open ? 'block' : 'hidden'}`}>
         <ul className="list-none px-4 py-2 md:px-8 divide-y divide-white/5">
           {visibleLinks.map(l => (
