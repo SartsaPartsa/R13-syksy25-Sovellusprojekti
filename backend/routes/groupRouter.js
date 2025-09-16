@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken'
 
 const router = Router()
 
-// --- SSE (Server-Sent Events) - kevyt pub/sub ---
+// --- SSE (Server-Sent Events) - lightweight pub/sub ---
 const streams = new Map() // groupId -> Set(res)
-const globalStreams = new Set() // kaikki ryhmien listapäivitykset
+const globalStreams = new Set() // all group list updates
 function addStream(groupId, res) {
   const key = String(groupId)
   if (!streams.has(key)) streams.set(key, new Set())
@@ -36,7 +36,7 @@ function notifyAll(type, payload = {}) {
   }
 }
 
-// Lista: ryhmät + hyväksyttyjen jäsenten määrä
+// List: groups + approved members count
 router.get('/', async (req, res, next) => {
   try {
     const { rows } = await pool.query(`
@@ -52,7 +52,7 @@ router.get('/', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// Luonti: luoja lisätään automaattisesti jäseneksi (APPROVED, MODERATOR)
+// Create: owner is automatically added as member (APPROVED, MODERATOR)
 router.post('/', auth, async (req, res, next) => {
   try {
     const { name } = req.body
@@ -78,13 +78,13 @@ router.post('/', auth, async (req, res, next) => {
       [group.id, ownerId]
     )
 
-  // ilmoita muille että uusi ryhmä on luotu
+  // notify others that a new group was created
   notifyAll('group-created', group)
   res.status(201).json(group)
   } catch (e) { next(e) }
 })
 
-// Detail: yksittäinen ryhmä
+// Detail: single group
 router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params
@@ -107,7 +107,7 @@ router.get('/:id', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// Join-pyyntö: luo/ylikirjoita PENDING
+// Join request: create/overwrite PENDING
 router.post('/:id/join', auth, async (req, res, next) => {
   try {
     const { id } = req.params
@@ -156,13 +156,13 @@ async function canModerate(groupId, userId) {
   return (await isOwner(groupId, userId)) || (await isModerator(groupId, userId))
 }
 
-// GET /api/groups/:id/members — vain jäsen/omistaja
+// GET /api/groups/:id/members — members/owner only
 router.get('/:id/members', auth, async (req, res, next) => {
   try {
     const { id } = req.params
     const me = req.user.id
 
-    // sallitaan omistajalle tai hyväksytylle jäsenelle
+  // allow owner or approved member
     const allowed = (await isOwner(id, me)) || (await pool.query(
       `SELECT 1 FROM group_membership WHERE group_id=$1 AND user_id=$2 AND status='APPROVED'`,
       [id, me]
@@ -221,7 +221,7 @@ router.patch('/:id/members/:userId', auth, async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// DELETE /api/groups/:id/members/me — poistuu ryhmästä (owner ei voi)
+// DELETE /api/groups/:id/members/me — leave the group (owner cannot)
 router.delete('/:id/members/me', auth, async (req, res, next) => {
   try {
     const { id } = req.params
@@ -238,7 +238,7 @@ router.delete('/:id/members/me', auth, async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// DELETE /api/groups/:id — vain omistaja
+// DELETE /api/groups/:id — owner only
 router.delete('/:id', auth, async (req, res, next) => {
   try {
     const { id } = req.params
@@ -255,13 +255,13 @@ router.delete('/:id', auth, async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// DELETE /api/groups/:id/members/:userId — poista jäsen (owner tai moderaattori)
+// DELETE /api/groups/:id/members/:userId — remove member (owner or moderator)
 router.delete('/:id/members/:userId', auth, async (req, res, next) => {
   try {
     const { id, userId } = req.params
     const me = req.user.id
     if (!(await canModerate(id, me))) { const e = new Error('Forbidden'); e.status = 403; return next(e) }
-    // owneria ei voi poistaa
+  // owner cannot be removed
     if (await isOwner(id, userId)) { const e = new Error('Cannot remove owner'); e.status = 400; return next(e) }
   await pool.query('DELETE FROM group_membership WHERE group_id=$1 AND user_id=$2', [id, userId])
   notify(id, 'members-changed')
@@ -289,7 +289,7 @@ router.get('/:id/movies', auth, async (req, res, next) => {
     }
     const r = await pool.query(
       `SELECT gm.id, gm.movie_id, gm.title, gm.added_by, gm.created_at,
-              COALESCE(json_agg(json_build_object('id', gs.id, 'starts_at', gs.starts_at, 'theater', gs.theater, 'auditorium', gs.auditorium)
+              COALESCE(json_agg(json_build_object('id', gs.id, 'starts_at', gs.starts_at, 'theater', gs.theater, 'auditorium', gs.auditorium, 'added_by', gs.added_by)
                 ORDER BY gs.starts_at) FILTER (WHERE gs.id IS NOT NULL), '[]') AS showtimes
        FROM group_movie gm
        LEFT JOIN group_showtime gs ON gs.group_movie_id = gm.id
@@ -328,8 +328,9 @@ router.delete('/:id/movies/:gmId', auth, async (req, res, next) => {
   try {
     const { id, gmId } = req.params
     const me = req.user.id
-    if (!(await canModerate(id, me))) { const e = new Error('Forbidden'); e.status = 403; return next(e) }
-  await pool.query('DELETE FROM group_movie WHERE id=$1 AND group_id=$2', [gmId, id])
+    // Only the user who added the movie can delete it
+    const del = await pool.query('DELETE FROM group_movie WHERE id=$1 AND group_id=$2 AND added_by=$3', [gmId, id, me])
+    if (del.rowCount === 0) { const e = new Error('Forbidden'); e.status = 403; return next(e) }
   notify(id, 'movies-changed')
     res.sendStatus(204)
   } catch (e) { next(e) }
@@ -359,8 +360,9 @@ router.delete('/:id/movies/:gmId/showtimes/:sid', auth, async (req, res, next) =
   try {
     const { id, gmId, sid } = req.params
     const me = req.user.id
-    if (!(await canModerate(id, me))) { const e = new Error('Forbidden'); e.status = 403; return next(e) }
-    await pool.query('DELETE FROM group_showtime WHERE id=$1 AND group_movie_id=$2', [sid, gmId])
+    // Only the user who added that showtime can delete it
+    const del = await pool.query('DELETE FROM group_showtime WHERE id=$1 AND group_movie_id=$2 AND added_by=$3', [sid, gmId, me])
+    if (del.rowCount === 0) { const e = new Error('Forbidden'); e.status = 403; return next(e) }
     notify(id, 'movies-changed')
     res.sendStatus(204)
   } catch (e) { next(e) }
@@ -374,7 +376,7 @@ router.get('/:id/stream', async (req, res, next) => {
     if (!token) return res.status(401).end()
     let userId
     try { userId = jwt.verify(token, process.env.JWT_SECRET)?.id } catch { return res.status(401).end() }
-    // salli myös PENDING-jäsenet, jotta hyväksyntä päivittyy reaaliaikaisesti
+  // allow PENDING members too so approval updates in real-time
     const allowed = (await isOwner(id, userId)) || (await pool.query(
       `SELECT 1 FROM group_membership WHERE group_id=$1 AND user_id=$2`, [id, userId]
     )).rowCount > 0
@@ -391,7 +393,7 @@ router.get('/:id/stream', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// Globaali ryhmälista-stream
+// Global group list stream
 router.get('/stream', async (req, res, next) => {
   try {
     const token = req.query.token || ''
@@ -408,7 +410,7 @@ router.get('/stream', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// Palauta nykyisen käyttäjän jäsenyys tälle ryhmälle (myös PENDING)
+// Return current user's membership for this group (including PENDING)
 router.get('/:id/membership/me', auth, async (req, res, next) => {
   try {
     const { id } = req.params

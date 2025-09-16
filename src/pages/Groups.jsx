@@ -1,74 +1,82 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { GroupsAPI, getAuthToken } from '../lib/api'
 
 export default function Groups() {
   const { t } = useTranslation('common')
+  const navigate = useNavigate()
   const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // modal state
+  // Local UI state
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState(null)
 
+  // Fetch initial groups and set up SSE listener
   useEffect(() => {
     let cancelled = false
-  let es
-  let retry
-    ;(async () => {
-      try {
-        const data = await GroupsAPI.list()
-        if (!cancelled) setGroups(Array.isArray(data) ? data : [])
-      } catch (e) {
-        if (!cancelled) setError(e)
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    // SSE: kuuntele ryhmälistan muutoksia
+    let es
+    let retry
+      ; (async () => {
+        try {
+          // Initial fetch of groups
+          const data = await GroupsAPI.list()
+          if (!cancelled) setGroups(Array.isArray(data) ? data : [])
+        } catch (e) {
+          if (!cancelled) setError(e)
+        } finally {
+          if (!cancelled) setLoading(false)
+        }
+      })()
+
+  // SSE: listen for server events that notify about group changes
     const start = () => {
       try {
         const tk = getAuthToken()
         if (!tk) return
         es = new EventSource(`/api/groups/stream?token=${encodeURIComponent(tk)}`)
-        const reload = () => GroupsAPI.list().then((d)=>!cancelled && setGroups(Array.isArray(d)?d:[])).catch(()=>{})
+  // Helper to reload list when an SSE event is received
+  const reload = () => GroupsAPI.list().then((d) => !cancelled && setGroups(Array.isArray(d) ? d : [])).catch(() => { })
         es.addEventListener('group-created', reload)
         es.addEventListener('group-deleted', reload)
         es.onerror = () => {
-          try { es?.close() } catch {}
+          try { es?.close() } catch { }
           if (!cancelled) retry = setTimeout(() => start(), 3000)
         }
       } catch {
         if (!cancelled) retry = setTimeout(() => start(), 3000)
       }
     }
+    // Start SSE and return cleanup
     start()
     return () => { cancelled = true; if (es) es.close(); if (retry) clearTimeout(retry) }
   }, [])
 
   const onCreate = async (e) => {
     e.preventDefault()
-    setFormError(null)
+  setFormError(null)
     const trimmed = name.trim()
     if (trimmed.length === 0 || trimmed.length > 120) {
       setFormError('Name must be 1–120 characters.')
       return
     }
-    setSubmitting(true)
+  // Mark submitting to disable form
+  setSubmitting(true)
     try {
-      const created = await GroupsAPI.create({ name: trimmed })
-      setGroups((prev) => [created, ...prev])
+  // Create group and prepend to local list on success
+  const created = await GroupsAPI.create({ name: trimmed })
+  setGroups((prev) => [created, ...prev])
       setName('')
       setOpen(false)
-  toast.success(t('groupsPage.createSuccess'))
+      toast.success(t('groupsPage.createSuccess'))
     } catch (e) {
-  setFormError(e?.message || t('groupsPage.createFailed'))
-  toast.error(e?.message || t('groupsPage.createFailed'))
+      setFormError(e?.message || t('groupsPage.createFailed'))
+      toast.error(e?.message || t('groupsPage.createFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -80,17 +88,21 @@ export default function Groups() {
         {t('groups') || 'Groups'}
       </h1>
 
-      <div className="mb-6">
+  {/* Create button */}
+  <div className="mb-6">
         <button
           type="button"
           className="inline-flex items-center gap-2 rounded-lg px-16 py-2 border border-white/10 bg-white/10 hover:bg-white/15 text-white"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            if (!getAuthToken()) { navigate('/login'); return }
+            setOpen(true)
+          }}
         >
           {t('groupsPage.createBtn')}
         </button>
       </div>
 
-      {/* Lista */}
+  {/* Groups list: show skeleton, error, empty state or items */}
       {loading ? (
         <div className="space-y-3">
           <SkeletonCard />
@@ -112,17 +124,17 @@ export default function Groups() {
         </ul>
       )}
 
-      {/* CREATE MODAL */}
+  {/* Create group modal dialog (backdrop + form) */}
       {open && (
         <div className="fixed inset-0 z-50">
           {/* backdrop */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70"
             onClick={() => !submitting && setOpen(false)}
           />
           {/* dialog */}
           <div className="absolute inset-0 grid place-items-center p-4">
-            <div className="w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/80 p-5 shadow-xl">
+            <div className="w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/95 p-5 shadow-xl">
               <h2 className="text-white text-lg font-medium mb-3">
                 {t('groupsPage.createDialogTitle')}
               </h2>
@@ -170,9 +182,10 @@ export default function Groups() {
   )
 }
 
-/* --- apukomponentit --- */
-
+/* --- helper subcomponents --- */
+// Small presentational components used only by the Groups page
 function GroupCard({ group, t }) {
+  // Normalize various backend field names to local variables
   const id = group.id ?? group._id
   const name = group.name ?? group.title ?? 'Unnamed group'
   const owner = group.owner_email ?? group.owner?.email ?? '—'
@@ -195,7 +208,7 @@ function GroupCard({ group, t }) {
         <div className="flex gap-2">
           <Link
             to={`/groups/${id}`}
-            className="rounded-lg px-3 py-1.5 border border-white/10 bg-white/10 hover:bg-white/15 text-white"
+            className="rounded-lg px-15 py-1.5 border border-white/10 bg-white/10 hover:bg-white/15 text-white"
           >
             {t('groupsPage.openCta')}
           </Link>
@@ -206,15 +219,17 @@ function GroupCard({ group, t }) {
 }
 
 function EmptyState({ t }) {
+  // Shown when there are no groups
   return (
     <div className="rounded-2xl border border-white/10 bg-gray-900/60 p-8 text-center">
-  <p className="text-white/80">{t('groupsPage.emptyTitle')}</p>
-  <p className="text-white/60 text-sm mt-1">{t('groupsPage.emptyLead')}</p>
+      <p className="text-white/80">{t('groupsPage.emptyTitle')}</p>
+      <p className="text-white/60 text-sm mt-1">{t('groupsPage.emptyLead')}</p>
     </div>
   )
 }
 
 function SkeletonCard() {
+  // Placeholder while loading
   return (
     <div className="rounded-2xl border border-white/10 bg-gray-900/60 p-4 animate-pulse">
       <div className="h-5 w-40 bg-white/10 rounded mb-2" />
@@ -224,9 +239,10 @@ function SkeletonCard() {
 }
 
 function fmtDate(iso) {
+  // Try to format ISO date using user's language preference
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
   let lang = 'fi-FI'
-  try { lang = (localStorage.getItem('lang') === 'en') ? 'en-US' : 'fi-FI' } catch {}
+  try { lang = (localStorage.getItem('lang') === 'en') ? 'en-US' : 'fi-FI' } catch { }
   return d.toLocaleDateString(lang)
 }
