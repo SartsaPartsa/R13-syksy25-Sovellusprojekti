@@ -97,6 +97,8 @@ const resources = {
       home: 'Etusivu',
       movies: 'Elokuvat',
       reviews: 'Arvostelut',
+    
+      
       theaters: 'Teatterit',
       favoritesPage: {
         title: 'Suosikit',
@@ -161,6 +163,23 @@ const resources = {
       footerTeamR13: 'Ryhmä 13',
       footerFollowUs: 'Seuraa meitä',
 
+
+
+  reviewPage:{
+        title:"Elokuvan arvostelu"
+      },
+      filters:{
+        genre:"Genre",
+        minRating:"Minimiarvio"
+      },
+      loading:"Ladataan...",
+      noResults:"Ei tuloksia",
+      pagination:{
+        previous:"Edellinen",
+        next:"Seuraava"
+      },
+
+
       notFound: {
         title: '404',
         lead: 'Sivua ei löytynyt.',
@@ -175,6 +194,7 @@ const resources = {
         loading: 'Haetaan…',
       },
 
+      
       filters: {
         genre: 'Genre',
         minRating: 'Minimiarvio',
@@ -398,6 +418,22 @@ const resources = {
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Team 13',
       footerFollowUs: 'Follow us',
+
+reviewPage:{
+  title:"Movie Review"
+},
+filters:{
+  genre:"Genre",
+  minRating:"Minimum rating"
+},
+loading:"Loading...",
+noResults:"No results found",
+pagination:{
+  previous:"Previous",
+  next:"Next"
+},
+
+
 
       notFound: {
         title: '404',

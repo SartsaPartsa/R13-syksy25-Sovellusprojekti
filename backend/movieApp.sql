@@ -58,3 +58,13 @@ CREATE INDEX IF NOT EXISTS idx_group_membership_group_status ON group_membership
 CREATE INDEX IF NOT EXISTS idx_group_movie_group ON group_movie(group_id);
 CREATE INDEX IF NOT EXISTS idx_group_showtime_movie ON group_showtime(group_movie_id);
 -- GROUP --
+
+---REVIEWS-----
+CREATE TABLE reviews (
+  id          BIGSERIAL PRIMARY KEY,
+  user_id     UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  movie_id    BIGINT NOT NULL,
+  rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  body        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
