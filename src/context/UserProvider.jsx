@@ -6,6 +6,7 @@ export default function UserProvider({ children }) {
   const [form, setForm] = useState({ email: '', password: '' })
   const [authUser, setAuthUser] = useState(null)
   const [token, setToken] = useState(null)
+  const [favorites, setFavorites] = useState(new Set())
 
   useEffect(() => {
     try {
@@ -30,6 +31,14 @@ export default function UserProvider({ children }) {
     localStorage.setItem('auth', JSON.stringify(auth))
     setAuthUser(auth.user)
     setToken(auth.token)
+    
+    // Lataa käyttäjän suosikit
+    const favRes = await fetch(`/api/favorites/${data.id}`)
+    if (favRes.ok) {
+      const favData = await favRes.json()
+      setFavorites(new Set(favData.map(f => f.movie_id)))
+    }
+    
     return auth
   }
 
@@ -48,6 +57,7 @@ export default function UserProvider({ children }) {
   
   function signOut() {
     try { localStorage.removeItem('auth') } catch {}
+    setFavorites(new Set())
     setAuthUser(null)
     setToken(null)
     setForm({ email: '', password: '' })
@@ -69,7 +79,9 @@ export default function UserProvider({ children }) {
         signIn,
         signUp,
         signOut,
-        logout: signOut,    // ← на всякий случай алиас
+        logout: signOut,
+        favorites,
+        setFavorites
       }}
     >
       {children}
