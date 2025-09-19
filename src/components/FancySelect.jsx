@@ -56,7 +56,7 @@ export function FancySelect({
         className={triggerClass}
       >
         {/* Visible value/placeholder */}
-        <span className={labelClassName}>{label}</span>
+  <span className={`block ${labelClassName}`}>{label}</span>
         {/* Caret icon */}
         <svg
           className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300"
@@ -87,6 +87,7 @@ export function FancySelect({
                           <path fillRule="evenodd" d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.07 7.07a1 1 0 0 1-1.415 0L3.29 9.838a1 1 0 1 1 1.415-1.415l3.239 3.239 6.364-6.364a1 1 0 0 1 1.396-.008z" clipRule="evenodd" />
                         </svg>
                       )}
+                      {/* Dropdown items: original single-line truncation */}
                       <span className="truncate">{o.label}</span>
                     </span>
                   </button>

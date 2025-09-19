@@ -92,18 +92,45 @@ const resources = {
         showtimeDeleteConfirm: 'Poistetaanko valittu näytösaika? Tätä ei voi perua.',
         leaveGroupTitle: 'Poistu ryhmästä?',
         leaveGroupConfirm: 'Haluatko varmasti poistua ryhmästä? Tätä toimintoa ei voi perua.',
+        deletedRedirect: 'Ryhmä poistettu – siirrytään ryhmälistaan.',
       },
       appName: 'Movie App',
       home: 'Etusivu',
       movies: 'Elokuvat',
       reviews: 'Arvostelut',
-    
-      
       theaters: 'Teatterit',
       favoritesPage: {
         title: 'Suosikit',
         empty: 'Ei suosikkeja',
         loginRequired: 'Kirjaudu sisään nähdäksesi suosikit',
+      },
+      favoritesShare: {
+        listsButton: 'Listat',
+        sharedListsTitle: 'Jaetut suosikkilistat',
+        myShareTitle: 'Jaa oma suosikkilistasi',
+        nameLabel: 'Nimi',
+        sharingLabel: 'Jako',
+        sharingOn: 'Jaettu (paina poistaaksesi jaon)',
+        sharingOff: 'Ei jaossa (paina jakaaksesi)',
+        viewing: 'Näytetään',
+        backToMine: 'Palaa omiin',
+        emptyShared: 'Tämä suosikkilista on tyhjä.',
+        noneSharedYet: 'Ei vielä jaettuja listoja',
+        loadingShared: 'Ladataan…',
+        copyLink: 'Kopioi linkki',
+        saveName: 'Tallenna uusi nimi',
+        showListPrefix: 'Näytä:',
+        shareEnabled: 'Suosikkilistasi on nyt jaettu.',
+        shareDisabled: 'Suosikkilistasi jako poistettu.',
+        linkCopied: 'Linkki kopioitu leikepöydälle.',
+        nameSaved: 'Nimi tallennettu.',
+        updateFailed: 'Päivitys epäonnistui.',
+        copyFailed: 'Linkin kopiointi epäonnistui.',
+        fetchFavoritesFailed: 'Suosikkien haku epäonnistui.',
+        fetchSharedFailed: 'Jaetun listan haku epäonnistui.',
+        loadShareFailed: 'Jaon tietojen haku epäonnistui.',
+        listNoLongerShared: 'Lista ei ole enää jaossa. Palattiin omiin.',
+        removeFailed: 'Suosikin poistaminen epäonnistui.'
       },
       favorites: 'Suosikit',
       search: 'Haku',
@@ -122,7 +149,6 @@ const resources = {
       loadingShows: 'Haetaan näytöksiä...',
       noShowsAvailable: 'Ei näytöksiä saatavilla',
       close: 'Sulje',
-
       signUp: 'Rekisteröidy',
       signup: 'Rekisteröidy',
       login: 'Kirjaudu sisään',
@@ -148,8 +174,7 @@ const resources = {
       langFi: 'Suomi',
       langEn: 'Englanti',
       title: 'Tervetuloa Movie Appiin!',
-      subtitle:
-        'Elokuvaharrastajien oma yhteisö - löydä elokuvat, tarkasta näytösajat, kirjoita arvosteluja ja jaa suosikkisi muiden kanssa.',
+      subtitle: 'Elokuvaharrastajien oma yhteisö - löydä elokuvat, tarkasta näytösajat, kirjoita arvosteluja ja jaa suosikkisi muiden kanssa.',
       introTitle: 'Päivän leffa',
       introLead: 'John Wick',
       showsTitle: 'Näytökset',
@@ -162,30 +187,24 @@ const resources = {
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Ryhmä 13',
       footerFollowUs: 'Seuraa meitä',
-
-
-
-  reviewPage:{
-        title:"Elokuvan arvostelu"
-      },
-      filters:{
-        genre:"Genre",
-        minRating:"Minimiarvio"
-      },
-      loading:"Ladataan...",
-      noResults:"Ei tuloksia",
-      pagination:{
-        previous:"Edellinen",
-        next:"Seuraava"
-      },
-
-
+      reviewPage:{
+            title:"Elokuvan arvostelu"
+          },
+          filters:{
+            genre:"Genre",
+            minRating:"Minimiarvio"
+          },
+          loading:"Ladataan...",
+          noResults:"Ei tuloksia",
+          pagination:{
+            previous:"Edellinen",
+            next:"Seuraava"
+          },
       notFound: {
         title: '404',
         lead: 'Sivua ei löytynyt.',
         backHome: 'Takaisin etusivulle',
       },
-
       searchPage: {
         title: 'Hakutulokset',
         termLabel: 'Hakusana',
@@ -193,8 +212,6 @@ const resources = {
         noResults: 'Ei tuloksia. Kokeile toista hakusanaa.',
         loading: 'Haetaan…',
       },
-
-      
       filters: {
         genre: 'Genre',
         minRating: 'Minimiarvio',
@@ -213,12 +230,10 @@ const resources = {
           popularity: 'Suosituimmat',
         },
       },
-
       pagination: {
         prev: 'Edellinen',
         next: 'Seuraava',
       },
-
       moviePage: {
         back: 'Takaisin',
         trailer: 'Katso traileri',
@@ -227,16 +242,12 @@ const resources = {
         cast: 'Näyttelijät',
         recommendations: 'Suositukset',
       },
-
-      // poistaminen
       account: {
         deleteBtn: 'Poista tili',
         deleting: 'Poistetaan…',
         confirmDelete: 'Haluatko varmasti poistaa tilin? Tätä toimintoa ei voi perua.',
         deleted: 'Tili poistettu.',
       },
-
-      // salasanan vaihto
       changePassword: {
         title: 'Vaihda salasana',
         lead: 'Syötä nykyinen salasana ja uusi salasana.',
@@ -349,6 +360,7 @@ const resources = {
         showtimeDeleteConfirm: 'Delete the selected showtime? This cannot be undone.',
         leaveGroupTitle: 'Leave the group?',
         leaveGroupConfirm: 'Are you sure you want to leave this group? This action cannot be undone.',
+        deletedRedirect: 'Group was deleted – redirecting to groups.',
       },
       appName: 'Movie App',
       home: 'Home',
@@ -359,6 +371,34 @@ const resources = {
         title: 'Favorites',
         empty: 'No favorites',
         loginRequired: 'Sign in to see your favorites',
+      },
+      favoritesShare: {
+        listsButton: 'Lists',
+        sharedListsTitle: 'Shared favorite lists',
+        myShareTitle: 'Share your favorites',
+        nameLabel: 'Name',
+        sharingLabel: 'Sharing',
+        sharingOn: 'Shared (click to disable)',
+        sharingOff: 'Not shared (click to share)',
+        viewing: 'Viewing',
+        backToMine: 'Back to mine',
+        emptyShared: 'This favorite list is empty.',
+        noneSharedYet: 'No shared lists yet',
+        loadingShared: 'Loading…',
+        copyLink: 'Copy link',
+        saveName: 'Save new name',
+        showListPrefix: 'Show:',
+        shareEnabled: 'Your favorite list is now shared.',
+        shareDisabled: 'Sharing disabled for your list.',
+        linkCopied: 'Link copied to clipboard.',
+        nameSaved: 'Name saved.',
+        updateFailed: 'Update failed.',
+        copyFailed: 'Copy failed.',
+        fetchFavoritesFailed: 'Failed to fetch favorites.',
+        fetchSharedFailed: 'Failed to fetch shared list.',
+        loadShareFailed: 'Failed to load sharing info.',
+        listNoLongerShared: 'List is no longer shared. Returned to your own.',
+        removeFailed: 'Failed to remove favorite.'
       },
       favorites: 'Favorites',
       search: 'Search',
@@ -377,7 +417,6 @@ const resources = {
       loadingShows: 'Loading shows...',
       noShowsAvailable: 'No shows available',
       close: 'Close',
-
       login: 'Sign in',
       logout: 'Log out',
       signUp: 'Sign Up',
@@ -404,8 +443,7 @@ const resources = {
       langFi: 'Finnish',
       langEn: 'English',
       title: 'Welcome to Movie App!',
-      subtitle:
-        'The community for movie enthusiasts - discover movies, check showtimes, write reviews, and share your favorites with others.',
+      subtitle: 'The community for movie enthusiasts - discover movies, check showtimes, write reviews, and share your favorites with others.',
       introTitle: 'Movie Of The Day',
       introLead: 'John Wick',
       showsTitle: 'Showtimes',
@@ -418,29 +456,24 @@ const resources = {
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Team 13',
       footerFollowUs: 'Follow us',
-
-reviewPage:{
-  title:"Movie Review"
-},
-filters:{
-  genre:"Genre",
-  minRating:"Minimum rating"
-},
-loading:"Loading...",
-noResults:"No results found",
-pagination:{
-  previous:"Previous",
-  next:"Next"
-},
-
-
-
+      reviewPage:{
+        title:"Movie Review"
+      },
+      filters:{
+        genre:"Genre",
+        minRating:"Minimum rating"
+      },
+      loading:"Loading...",
+      noResults:"No results found",
+      pagination:{
+        previous:"Previous",
+        next:"Next"
+      },
       notFound: {
         title: '404',
         lead: 'Page not found.',
         backHome: 'Back to home',
       },
-
       searchPage: {
         title: 'Search results',
         termLabel: 'Query',
@@ -448,7 +481,6 @@ pagination:{
         noResults: 'No results. Try another query.',
         loading: 'Loading…',
       },
-
       filters: {
         genre: 'Genre',
         minRating: 'Min rating',
@@ -467,16 +499,13 @@ pagination:{
           popularity: 'Popularity',
         },
       },
-
       pagination: {
         prev: 'Previous',
         next: 'Next',
       },
-
       movie: {
         noImage: 'No image',
       },
-
       moviePage: {
         back: 'Back',
         trailer: 'Watch trailer',
@@ -485,16 +514,12 @@ pagination:{
         cast: 'Cast',
         recommendations: 'Recommendations',
       },
-
-      // account deletion
       account: {
         deleteBtn: 'Delete account',
         deleting: 'Deleting…',
         confirmDelete: 'Are you sure you want to delete your account? This cannot be undone.',
         deleted: 'Account deleted.',
       },
-
-      // password change
       changePassword: {
         title: 'Change password',
         lead: 'Enter your current and new password.',

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { XMLParser } from "fast-xml-parser";
 
@@ -7,6 +8,8 @@ const FINNKINO_API = "https://www.finnkino.fi/xml";
 
 export default function Theaters() {
   const { t } = useTranslation("common");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Käyttäjän hakusana teatterien suodattamiseen
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,6 +35,13 @@ export default function Theaters() {
 
   // Mahdollinen virheilmoitus
   const [error, setError] = useState(null);
+
+  // Jos tullaan sivulle esimerkiksi /theaters?area=1031 poimitaan area talteen
+  useEffect(() => {
+    const sp = new URLSearchParams(location.search);
+    const area = sp.get("area");
+    if (area) setSelectedTheater(area);
+  }, [location.search]);
 
   // Funktio: avaa/sulkee kaupungin listasta
   const toggleCity = (city) => {
@@ -246,6 +256,8 @@ export default function Theaters() {
                   setSelectedTheater(null);
                   setShows([]);
                   setSelectedDate("");
+                  // Poistetaan mahdollinen ?area=... urlista
+                  navigate("/theaters", { replace: false });
                 }}
                 className="px-5 py-2 rounded-lg bg-[#FF8C00] text-black hover:bg-[#E67E00] transition-colors duration-200"
               >

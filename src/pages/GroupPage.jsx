@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { GroupsAPI, getAuthToken } from '../lib/api'
 import { fetchMovies } from '../lib/api/search'
 import { fetchMovie } from '../lib/api/movies'
@@ -12,6 +12,7 @@ import FancySelect from '../components/FancySelect'
 export default function GroupPage() {
     const { id } = useParams()
     const navigate = useNavigate()
+    const location = useLocation()
     const { t } = useTranslation('common')
     // Data state
     const [group, setGroup] = useState(null)
@@ -96,7 +97,15 @@ export default function GroupPage() {
                     const g = await GroupsAPI.get(id)
                     if (!cancelled) setGroup(g)
                 } catch (e) {
-                    if (!cancelled) setErr(e.message || 'Failed to load group')
+                    if (!cancelled) {
+                        if (e?.status === 404) {
+                            // If the group does not exist, go back to list
+                            toast?.info?.(t('groupsPage.deletedRedirect'))
+                            navigate('/groups')
+                        } else {
+                            setErr(e.message || 'Failed to load group')
+                        }
+                    }
                 } finally {
                     if (!cancelled) setLoading(false)
                 }
@@ -107,12 +116,34 @@ export default function GroupPage() {
     // Load members & movies and set up SSE for realtime updates
     useEffect(() => {
         if (!tokenExists || !group) return
+        // Helper: after membership changes, retry movie fetch briefly to avoid race conditions
+        const refreshMoviesWithRetry = async (attempts = 5, delayMs = 300) => {
+            for (let i = 0; i < attempts; i++) {
+                try {
+                    const d = await GroupsAPI.movies(id)
+                    setMovies(d)
+                    return
+                } catch (e) {
+                    const status = e?.status
+                    if (status === 403 || status === 404) {
+                        // likely not yet approved or visibility not propagated; retry shortly
+                        await new Promise(r => setTimeout(r, delayMs))
+                        continue
+                    }
+                    // other errors: stop
+                    break
+                }
+            }
+        }
         // Try to load members; if forbidden, fetch only my membership
         GroupsAPI.members(id).then(setMembers).catch(async () => {
             try {
                 const mine = await GroupsAPI.myMembership(id)
                 if (mine) setMembers([{ user_id: likelyUserId, email: (authUser?.email), status: mine.status, role: mine.role }])
-            } catch { }
+                else setMembers([])
+            } catch {
+                setMembers([])
+            }
         })
         // Load movies for the group
         GroupsAPI.movies(id).then(setMovies).catch(() => { })
@@ -131,17 +162,31 @@ export default function GroupPage() {
                         if (!ok) {
                             try {
                                 const mine = await GroupsAPI.myMembership(id)
-                                if (mine) setMembers([{ user_id: likelyUserId, email: (authUser?.email), status: mine.status, role: mine.role }])
-                            } catch { }
+                                if (mine) {
+                                    setMembers([{ user_id: likelyUserId, email: (authUser?.email), status: mine.status, role: mine.role }])
+                                } else {
+                                    setMembers([])
+                                    setMovies([])
+                                    return
+                                }
+                            } catch {
+                                setMembers([])
+                                setMovies([])
+                                return
+                            }
                         }
+                        // Try fetching movies regardless; will succeed if approved/owner, 403 otherwise
+                        // Fetch movies; if approval just happened, we may need to retry briefly
+                        refreshMoviesWithRetry()
                     })
                     es.addEventListener('movies-changed', () => {
                         // Refresh movies on change
                         GroupsAPI.movies(id).then(setMovies).catch(() => { })
                     })
                     es.addEventListener('group-deleted', () => {
-                        // Refresh group when deleted (server may return 404)
-                        GroupsAPI.get(id).then(setGroup).catch(() => { })
+                        // Group was deleted while this page is open → redirect to list
+                        toast?.info?.(t('groupsPage.deletedRedirect'))
+                        navigate('/groups')
                     })
                     es.onerror = () => { try { es?.close() } catch { }; retry = setTimeout(() => start(), 3000) }
                 } catch { retry = setTimeout(() => start(), 3000) }
@@ -464,7 +509,8 @@ export default function GroupPage() {
                                         {movies.map(m => (
                                             <li key={m.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
                                                 <div className="flex items-start justify-between gap-3">
-                                                    <div className="flex gap-3">
+                                                    {/* Clickable movie block navigates to details */}
+                                                    <Link to={`/movies/${m.movie_id}`} state={{ from: location }} className="flex gap-3 hover:opacity-95">
                                                         {/* Movie thumbnail */}
                                                         {posters[m.movie_id] ? (
                                                             <img src={posters[m.movie_id]} alt={m.title} className="w-12 h-[72px] object-cover rounded-md flex-shrink-0" loading="lazy" />
@@ -475,7 +521,7 @@ export default function GroupPage() {
                                                             <div className="text-white font-medium">{m.title || t('groupsPage.movieNumber', { id: m.movie_id })}</div>
                                                             <div className="text-white/60 text-sm">{t('groupsPage.tmdbShort')} {m.movie_id}</div>
                                                         </div>
-                                                    </div>
+                                                    </Link>
                                                     {m.added_by === likelyUserId && (
                                                         <button onClick={async () => { const ok = await confirmMovieDeleteToast(t, { title: m.title }); if (!ok) return; GroupsAPI.deleteMovie(id, m.id).then(() => { setMovies(prev => prev.filter(x => x.id !== m.id)); toast.success(t('groupsPage.movieDeleted')) }).catch(e => { setErr(e.message); toast.error(e?.message || t('groupsPage.movieDeleteFailed')) }) }} className="px-2 py-1 rounded-md bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-200 text-sm">{t('groupsPage.deleteAction')}</button>
                                                     )}

@@ -22,39 +22,42 @@ export default function Groups() {
     let cancelled = false
     let es
     let retry
-      ; (async () => {
-        try {
-          // Initial fetch of groups
-          const data = await GroupsAPI.list()
-          if (!cancelled) setGroups(Array.isArray(data) ? data : [])
-        } catch (e) {
-          if (!cancelled) setError(e)
-        } finally {
-          if (!cancelled) setLoading(false)
-        }
-      })()
 
-  // SSE: listen for server events that notify about group changes
-    const start = () => {
+    ;(async () => {
       try {
-        const tk = getAuthToken()
-        if (!tk) return
+        const data = await GroupsAPI.list()
+        if (!cancelled) setGroups(Array.isArray(data) ? data : [])
+      } catch (e) {
+        if (!cancelled) setError(e)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+
+    // SSE: listen for server events that notify about group list changes
+    const start = () => {
+      const tk = getAuthToken()
+      if (!tk) return
+      try {
         es = new EventSource(`/api/groups/stream?token=${encodeURIComponent(tk)}`)
-  // Helper to reload list when an SSE event is received
-  const reload = () => GroupsAPI.list().then((d) => !cancelled && setGroups(Array.isArray(d) ? d : [])).catch(() => { })
+        const reload = () => {
+          GroupsAPI.list()
+            .then((d) => { if (!cancelled) setGroups(Array.isArray(d) ? d : []) })
+            .catch(() => {})
+        }
         es.addEventListener('group-created', reload)
         es.addEventListener('group-deleted', reload)
+        es.addEventListener('group-updated', reload)
         es.onerror = () => {
-          try { es?.close() } catch { }
-          if (!cancelled) retry = setTimeout(() => start(), 3000)
+          try { es?.close() } catch {}
+          if (!cancelled) retry = setTimeout(start, 3000)
         }
       } catch {
-        if (!cancelled) retry = setTimeout(() => start(), 3000)
+        if (!cancelled) retry = setTimeout(start, 3000)
       }
     }
-    // Start SSE and return cleanup
     start()
-    return () => { cancelled = true; if (es) es.close(); if (retry) clearTimeout(retry) }
+    return () => { cancelled = true; try { es?.close() } catch {}; if (retry) clearTimeout(retry) }
   }, [])
 
   const onCreate = async (e) => {
