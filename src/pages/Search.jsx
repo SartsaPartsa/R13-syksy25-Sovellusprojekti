@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fetchMovies, fetchGenres } from '../lib/api/search'
+import FavoriteButton from '../components/FavoriteButton'
 
 export default function Search() {
   const location = useLocation()
@@ -303,6 +304,7 @@ export default function Search() {
                 <div className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-xs text-white ring-1 ring-white/10">
                   ⭐ {m.vote_average ?? '–'}
                 </div>
+                <FavoriteButton movieId={m.id} />
               </div>
               <div className="p-3">
                 <div className="font-medium text-white line-clamp-1">{m.title}</div>

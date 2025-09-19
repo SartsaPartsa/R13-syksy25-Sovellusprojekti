@@ -100,6 +100,12 @@ const resources = {
     
       
       theaters: 'Teatterit',
+      favoritesPage: {
+        title: 'Suosikit',
+        empty: 'Ei suosikkeja',
+        loginRequired: 'Kirjaudu sisään nähdäksesi suosikit',
+      },
+      favorites: 'Suosikit',
       search: 'Haku',
       loading: 'Lataa...',
       errorFetchingData: 'Virhe haettaessa tietoja',
@@ -129,7 +135,6 @@ const resources = {
       missingFields: 'Syötä sähköposti ja salasana.',
       signupFailed: 'Rekisteröityminen epäonnistui. Tarkista tiedot.',
       logout: 'Kirjaudu ulos',
-      favorites: 'Suosikit',
       groups: 'Ryhmät',
       myAccount: 'Omat tiedot',
       signuplead: 'Rekisteröidy jatkaaksesi',
@@ -350,6 +355,12 @@ const resources = {
       movies: 'Movies',
       reviews: 'Reviews',
       theaters: 'Theaters',
+      favoritesPage: {
+        title: 'Favorites',
+        empty: 'No favorites',
+        loginRequired: 'Sign in to see your favorites',
+      },
+      favorites: 'Favorites',
       search: 'Search',
       loading: 'Loading...',
       errorFetchingData: 'Error fetching data',

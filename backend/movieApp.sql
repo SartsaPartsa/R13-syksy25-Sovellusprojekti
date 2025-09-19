@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE "user" (
+CREATE TABLE IF NOT EXISTS "user" (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email varchar(320) not null unique,
   password_hash text not null,
@@ -9,7 +9,7 @@ CREATE TABLE "user" (
 );
 
 -- GROUP --
-CREATE TABLE "group" (
+CREATE TABLE IF NOT EXISTS "group" (
   id bigserial PRIMARY KEY,
   name varchar(120) NOT NULL UNIQUE,
   owner_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
@@ -44,6 +44,13 @@ CREATE TABLE IF NOT EXISTS group_showtime (
   auditorium varchar(120) DEFAULT '',
   added_by uuid REFERENCES "user"(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS favorites (
+  id SERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  movie_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes
