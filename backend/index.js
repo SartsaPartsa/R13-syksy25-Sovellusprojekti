@@ -8,6 +8,7 @@ import movieRouter from './routes/movieRouter.js'
 import groupRouter from './routes/groupRouter.js'
 import favoritesRouter from './routes/favoritesRouter.js'  
 import reviewsRouter from './routes/reviewRouter.js'
+import reviewsPublicRouter from './routes/reviewsPublicRouter.js';
 
 dotenv.config()
 
@@ -22,6 +23,7 @@ app.use('/api/movies', movieRouter)
 app.use('/api/groups', groupRouter)
 app.use('/api/favorites', favoritesRouter)   
 app.use('/api/reviews', reviewsRouter)
+app.use('/api/reviews', reviewsPublicRouter);
 
 // Virheiden käsittely
 app.use((err, req, res, next) => {
