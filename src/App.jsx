@@ -15,6 +15,8 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ChangePassword from './pages/ChangePassword.jsx'
 import GroupPage from './pages/GroupPage'
+import SharedFavorites from './pages/SharedFavorites.jsx'
+import SharedFavoritesIndex from './pages/SharedFavoritesIndex.jsx'
 
 export default function App() {
   return (
@@ -31,6 +33,8 @@ export default function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<Home />} />
+        <Route path="/shared/:slug" element={<SharedFavorites />} />
+        <Route path="/shared" element={<SharedFavoritesIndex />} />
         <Route path="login" element={<Login />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="movies" element={<Reviews />} />

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fetchMovie } from '../lib/api/movies'
+import FavoriteButton from '../components/FavoriteButton'
 
 export default function MovieDetails() {
   const { id } = useParams()
@@ -37,10 +38,19 @@ export default function MovieDetails() {
   const trailerUrl = data?.trailer?.key ? `https://www.youtube.com/watch?v=${data.trailer.key}` : null
 
   function goBack() {
-    if (location.state?.from && window.history.length > 1) {
+    const from = location.state?.from
+    // If we navigated here from within the app and have history, go back.
+    if (from && window.history.length > 1) {
       navigate(-1)
       return
     }
+    // If we have an explicit origin but no history (e.g., opened in a new tab),
+    // navigate directly to that route.
+    if (from?.pathname) {
+      navigate(from.pathname + (from.search || ''))
+      return
+    }
+    // Fallback to search when no context is available.
     navigate('/search')
   }
 
@@ -127,7 +137,11 @@ export default function MovieDetails() {
                     ))}
                   </span>
                 )}
-                <span>⭐ {data.vote_average ?? '–'}</span>
+                <span className="inline-flex items-center gap-2">
+                  ⭐ {data.vote_average ?? '–'}
+                  {/* Favorite toggle visible on details page */}
+                  <FavoriteButton movieId={Number(id)} inline className="ml-1" />
+                </span>
               </div>
 
               {/* Overview */}

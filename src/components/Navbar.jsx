@@ -13,13 +13,11 @@ const LINKS = [
   { to: '/theaters', key: 'theaters' },
   { to: '/reviews', key: 'reviews' },
   { to: '/groups', key: 'groups' },
+  { to: '/favorites', key: 'favorites' },
 ]
 
 // Links visible only when user is logged in
-const AUTH_LINKS = [
-  { to: '/favorites', key: 'favorites' },
-  { to: '/account', key: 'myAccount' },
-]
+const AUTH_LINKS = [ { to: '/account', key: 'myAccount' } ]
 
 // Navbar: responsive top navigation with search, language and theater selectors
 export function Navbar() {
@@ -171,7 +169,7 @@ export function Navbar() {
             {visibleLinks.map(l => (
               <li key={l.key}>
                 <NavLink
-                  to={l.to}
+                  to={(!userLoggedIn && l.to === '/favorites') ? '/shared' : l.to}
                   end={l.to === '/'}
                   onClick={() => { setOpen(false); setSearchOpen(false) }}
                   className={({ isActive }) =>
@@ -194,7 +192,7 @@ export function Navbar() {
               placeholder={theatersLoading ? '…' : t('chooseTheater')}
               options={theaterOptions}
               align="left"
-              labelClassName="truncate max-w-[11rem]"
+              labelClassName="truncate max-w-[12ch]"
             />
             {/* Language (shared FancySelect) */}
             <FancySelect
@@ -311,7 +309,7 @@ export function Navbar() {
           {visibleLinks.map(l => (
             <li key={l.key}>
               <NavLink
-                to={l.to}
+                to={(!userLoggedIn && l.to === '/favorites') ? '/shared' : l.to}
                 end={l.to === '/'}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>

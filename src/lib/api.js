@@ -161,3 +161,18 @@ export const GroupsAPI = {
   },
 }
 
+// --- Favorites sharing API ---
+export const FavoritesAPI = {
+  sharedLists: () => api('/api/favorites/shared'),
+  myShare: async () => {
+    const tk = getAuthToken(); if (!tk) throw new Error('Not authenticated')
+    return api('/api/favorites/share/me', { headers: { Authorization: `Bearer ${tk}` } })
+  },
+  updateShare: async (payload) => {
+    const tk = getAuthToken(); if (!tk) throw new Error('Not authenticated')
+    return api('/api/favorites/share', { method: 'POST', headers: { Authorization: `Bearer ${tk}` }, body: JSON.stringify(payload) })
+  },
+  sharedMeta: (slug) => api(`/api/favorites/share/${slug}`),
+  sharedMovies: (slug) => api(`/api/favorites/share/${slug}/movies`),
+}
+

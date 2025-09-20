@@ -46,6 +46,13 @@ CREATE TABLE IF NOT EXISTS group_showtime (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_group_membership_group_status ON group_membership(group_id, status);
+CREATE INDEX IF NOT EXISTS idx_group_movie_group ON group_movie(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_showtime_movie ON group_showtime(group_movie_id);
+-- GROUP --
+
+---FAVORITES---
 CREATE TABLE IF NOT EXISTS favorites (
   id SERIAL PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
@@ -53,11 +60,15 @@ CREATE TABLE IF NOT EXISTS favorites (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_group_membership_group_status ON group_membership(group_id, status);
-CREATE INDEX IF NOT EXISTS idx_group_movie_group ON group_movie(group_id);
-CREATE INDEX IF NOT EXISTS idx_group_showtime_movie ON group_showtime(group_movie_id);
--- GROUP --
+CREATE TABLE IF NOT EXISTS favorite_share (
+  user_id    UUID PRIMARY KEY REFERENCES "user"(id) ON DELETE CASCADE,
+  display_name TEXT NOT NULL DEFAULT '',
+  slug         UUID NOT NULL DEFAULT uuid_generate_v4() UNIQUE,
+  is_shared    BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+---FAVORITES---
 
 ---REVIEWS-----
 CREATE TABLE reviews (
@@ -68,3 +79,4 @@ CREATE TABLE reviews (
   body        TEXT NOT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+

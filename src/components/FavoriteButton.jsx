@@ -4,9 +4,9 @@ import { api } from '../lib/api';
 import { FaHeart } from "react-icons/fa";
 
 // Nappi, jolla lisätään tai poistetaan elokuva suosikeista
-export default function FavoriteButton({ movieId }) {
+export default function FavoriteButton({ movieId, inline = false, className = '' }) {
   // Haetaan käyttäjä ja hänen suosikkinsa
-  const { authUser, favorites, setFavorites } = useContext(UserContext);
+  const { authUser, isAuthenticated, favorites, setFavorites } = useContext(UserContext);
 
   // Onko tämä elokuva jo suosikeissa?
   const isFavorite = favorites.has(movieId);
@@ -49,25 +49,27 @@ export default function FavoriteButton({ movieId }) {
     }
   };
 
-  // Jos ei ole kirjautunut → nappia ei näytetä ollenkaan
-  if (!authUser) return null;
+  // Jos ei ole kirjautunut niin nappia ei näytetä ollenkaan
+  if (!authUser || !isAuthenticated) return null;
+
+  const overlayBtnCls = "absolute top-2 right-2 p-2 text-red-500 hover:text-red-600 transition-colors z-10"
+  const inlineBtnCls = "inline-flex items-center justify-center rounded-full p-2 ring-1 ring-white/10 hover:bg-white/10 transition-colors"
 
   return (
     <button
       onClick={(e) => {
-        e.stopPropagation(); // estää klikin leviämisen
-        e.preventDefault();  // estää sivun turhan uudelleenlatauksen
-        toggleFavorite();    // vaihda sydämen tila
+        e.stopPropagation();
+        e.preventDefault();
+        toggleFavorite();
       }}
-      className="absolute top-2 right-2 p-2 text-red-500 hover:text-red-600 transition-colors z-10"
+      className={`${inline ? inlineBtnCls : overlayBtnCls} ${className}`}
       aria-label={isFavorite ? 'Poista suosikeista' : 'Lisää suosikkeihin'}
+      title={isFavorite ? 'Poista suosikeista' : 'Lisää suosikkeihin'}
     >
       {isFavorite ? (
-        // Jos on suosikeissa → punainen sydän
-        <FaHeart className="w-6 h-6 text-red-600 drop-shadow-[0_0_10px_black]" />
+        <FaHeart className={`drop-shadow-[0_0_10px_black] ${inline ? 'w-5 h-5 text-red-500' : 'w-6 h-6 text-red-600'}`} />
       ) : (
-        // Jos ei ole → valkoinen sydän
-        <FaHeart className="w-6 h-6 text-white drop-shadow-[0_0_10px_black]" />
+        <FaHeart className={`drop-shadow-[0_0_10px_black] ${inline ? 'w-5 h-5 text-white' : 'w-6 h-6 text-white'}`} />
       )}
     </button>
   );

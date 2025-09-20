@@ -84,6 +84,23 @@ router.post('/', auth, async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
+// Global group list stream (must be before `/:id/stream` to avoid route shadowing)
+router.get('/stream', async (req, res, next) => {
+  try {
+    const token = req.query.token || ''
+    if (!token) return res.status(401).end()
+    try { jwt.verify(token, process.env.JWT_SECRET) } catch { return res.status(401).end() }
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+    res.flushHeaders?.()
+    res.write('event: connected\n')
+    res.write('data: {"ok":true}\n\n')
+    globalStreams.add(res)
+    req.on('close', () => { globalStreams.delete(res) })
+  } catch (e) { next(e) }
+})
+
 // Detail: single group
 router.get('/:id', async (req, res, next) => {
   try {
@@ -203,21 +220,28 @@ router.patch('/:id/members/:userId', auth, async (req, res, next) => {
       return next(e)
     }
 
-    const status = action === 'approve' ? 'APPROVED' : 'REJECTED'
+    if (action === 'reject') {
+      // Remove the membership row entirely when rejecting a join request
+      const del = await pool.query(
+        'DELETE FROM group_membership WHERE group_id=$1 AND user_id=$2',
+        [id, userId]
+      )
+      if (del.rowCount === 0) { const e = new Error('Membership not found'); e.status = 404; return next(e) }
+      notify(id, 'members-changed')
+      return res.sendStatus(204)
+    }
+
+    // approve → set status APPROVED
     const r = await pool.query(
       `UPDATE group_membership 
-       SET status = $3 
+       SET status = 'APPROVED' 
        WHERE group_id=$1 AND user_id=$2
        RETURNING user_id, status, role, created_at`,
-      [id, userId, status]
+      [id, userId]
     )
-  if (r.rowCount === 0) {
-      const e = new Error('Membership not found')
-      e.status = 404
-      return next(e)
-    }
-  notify(id, 'members-changed')
-  res.status(200).json(r.rows[0])
+    if (r.rowCount === 0) { const e = new Error('Membership not found'); e.status = 404; return next(e) }
+    notify(id, 'members-changed')
+    res.status(200).json(r.rows[0])
   } catch (e) { next(e) }
 })
 
@@ -390,23 +414,6 @@ router.get('/:id/stream', async (req, res, next) => {
     res.write('data: {"ok":true}\n\n')
     addStream(id, res)
     req.on('close', () => removeStream(id, res))
-  } catch (e) { next(e) }
-})
-
-// Global group list stream
-router.get('/stream', async (req, res, next) => {
-  try {
-    const token = req.query.token || ''
-    if (!token) return res.status(401).end()
-    try { jwt.verify(token, process.env.JWT_SECRET) } catch { return res.status(401).end() }
-    res.setHeader('Content-Type', 'text/event-stream')
-    res.setHeader('Cache-Control', 'no-cache')
-    res.setHeader('Connection', 'keep-alive')
-    res.flushHeaders?.()
-    res.write('event: connected\n')
-    res.write('data: {"ok":true}\n\n')
-    globalStreams.add(res)
-    req.on('close', () => { globalStreams.delete(res) })
   } catch (e) { next(e) }
 })
 
