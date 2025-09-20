@@ -49,7 +49,7 @@ const resources = {
         loadShows: 'Hae näytökset',
         addToGroup: 'Lisää ryhmään',
         chooseTheaterAndDate: 'Valitse teatteri ja päivä nähdäksesi näytökset',
-        backToGroups: 'Takaisin ryhmiin',
+        backToGroups: 'Takaisin',
         signInToRequestJoin: 'Kirjaudu sisään pyytääksesi liittymistä',
         leaveGroup: 'Poistu ryhmästä',
         requestPending: 'Pyyntö odottaa…',
@@ -241,6 +241,31 @@ const resources = {
         director: 'Ohjaaja',
         cast: 'Näyttelijät',
         recommendations: 'Suositukset',
+        reviews: 'Arvostelut',
+      },
+      review: {
+        myReview: 'Oma arvostelu',
+        placeholder: 'Kirjoita kommentti…',
+        save: 'Tallenna',
+        delete: 'Poista',
+        deleteTitle: 'Poista arvostelu?',
+        deleteConfirm: 'Poistetaanko arvostelusi?',
+        loginHint: 'Kirjaudu sisään jättääksesi arvostelun.',
+        saving: 'Tallennetaan…',
+        saved: 'Arvostelu tallennettu.',
+        saveFailed: 'Tallennus epäonnistui.',
+        deleting: 'Poistetaan…',
+        deleted: 'Arvostelu poistettu.',
+        deleteFailed: 'Poisto epäonnistui.',
+        loadFailed: 'Arvostelujen lataus epäonnistui.'
+      },
+      reviewPage: {
+        title: 'Elokuvan arvostelu',
+        empty: 'Ei arvosteluja vielä.',
+        openMovie: 'Avaa elokuvan sivu',
+        by: 'Arvostelun antoi: {{email}}',
+        postedAt: 'Ajankohta',
+        comment: 'Kommentti'
       },
       account: {
         deleteBtn: 'Poista tili',
@@ -317,7 +342,7 @@ const resources = {
         loadShows: 'Load shows',
         addToGroup: 'Add to group',
         chooseTheaterAndDate: 'Choose theater and date to see shows',
-        backToGroups: 'Back to groups',
+        backToGroups: 'Back',
         signInToRequestJoin: 'Sign in to request to join',
         leaveGroup: 'Leave group',
         requestPending: 'Request pending…',
@@ -457,7 +482,8 @@ const resources = {
       footerTeamR13: 'Team 13',
       footerFollowUs: 'Follow us',
       reviewPage:{
-        title:"Movie Review"
+        title:"Movie Review",
+        empty: 'No reviews yet.'
       },
       filters:{
         genre:"Genre",
@@ -513,6 +539,31 @@ const resources = {
         director: 'Director',
         cast: 'Cast',
         recommendations: 'Recommendations',
+        reviews: 'Reviews',
+      },
+      review: {
+        myReview: 'My review',
+        placeholder: 'Write a comment…',
+        save: 'Save',
+        delete: 'Delete',
+        deleteTitle: 'Delete review?',
+        deleteConfirm: 'Delete your review?',
+        loginHint: 'Sign in to leave a review.',
+        saving: 'Saving…',
+        saved: 'Review saved.',
+        saveFailed: 'Failed to save.',
+        deleting: 'Deleting…',
+        deleted: 'Review deleted.',
+        deleteFailed: 'Failed to delete.',
+        loadFailed: 'Failed to load reviews.'
+      },
+      reviewPage: {
+        title: 'Movie Review',
+        empty: 'No reviews yet.',
+        openMovie: 'Open movie page',
+        by: 'Review by: {{email}}',
+        postedAt: 'Posted',
+        comment: 'Comment'
       },
       account: {
         deleteBtn: 'Delete account',

@@ -70,13 +70,18 @@ CREATE TABLE IF NOT EXISTS favorite_share (
 );
 ---FAVORITES---
 
----REVIEWS-----
-CREATE TABLE reviews (
+---REVIEWS---
+CREATE TABLE IF NOT EXISTS "review" (
   id          BIGSERIAL PRIMARY KEY,
-  user_id     UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-  movie_id    BIGINT NOT NULL,
+  user_id     UUID    NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  movie_id    BIGINT  NOT NULL,
   rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-  body        TEXT NOT NULL,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  text        TEXT    NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (movie_id, user_id)
 );
+---REVIEWS---
+
+
 

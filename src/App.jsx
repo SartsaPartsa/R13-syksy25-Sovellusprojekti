@@ -21,12 +21,13 @@ import SharedFavoritesIndex from './pages/SharedFavoritesIndex.jsx'
 export default function App() {
   return (
     <>
-     <ToastContainer
+      <ToastContainer
         position="top-center"
         autoClose={3000}
         theme="light"
         newestOnTop
         closeOnClick
+        closeButton
         pauseOnFocusLoss={false}
         limit={3}             
       />

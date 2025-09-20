@@ -27,34 +27,20 @@ export default function Account() {
   function confirmDeleteToast() {
     return new Promise((resolve) => {
       let id
-      id = toast(
-        ({ closeToast }) => (
-          <div className="space-y-3">
-            <p className="font-semibold">
-              {t('account.confirmTitle', 'Poista tili?')}
-            </p>
-            <p className="text-sm opacity-80">
-              {t('account.confirmDelete', 'Haluatko varmasti poistaa tilin? Tätä toimintoa ei voi perua.')}
-            </p>
-
-            <div className="flex justify-end gap-2 pt-1">
-              <button
-                onClick={() => { toast.dismiss(id); resolve(false) }}
-                className="px-3 py-1.5 rounded-md bg-white/10 text-white hover:bg-white/20"
-              >
-                {t('common.cancel', 'Peruuta')}
-              </button>
-              <button
-                onClick={() => { toast.dismiss(id); resolve(true) }}
-                className="px-3 py-1.5 rounded-md border border-red-500/60 text-red-300 hover:bg-red-500/10"
-              >
-                {t('account.deleteBtn', 'Poista tili')}
-              </button>
-            </div>
+      id = toast(() => (
+        <div className="space-y-3">
+          <p className="font-semibold text-black">{t('account.confirmTitle', 'Poista tili?')}</p>
+          <p className="text-sm text-black">{t('account.confirmDelete', 'Haluatko varmasti poistaa tilin? Tätä toimintoa ei voi perua.')}</p>
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              onClick={() => { toast.dismiss(id); resolve(true) }}
+              className="px-3 py-1.5 rounded-md bg-red-500/20 hover:bg-red-500/30 border border-red-600 text-red-600"
+            >
+              {t('account.deleteBtn', 'Poista tili')}
+            </button>
           </div>
-        ),
-        { autoClose: false, closeOnClick: false, draggable: false, hideProgressBar: true }
-      )
+        </div>
+      ), { autoClose: false, closeOnClick: false, closeButton: true, draggable: false, hideProgressBar: true })
     })
   }
 
@@ -111,21 +97,23 @@ export default function Account() {
       {err && <p className="text-red-400 text-sm mt-3">{err}</p>}
       {!tk && <p className="text-amber-300 text-sm mt-2">No token provided — kirjaudu sisään uudelleen.</p>}
 
-      <div className="max-w-md mt-6 space-y-3">
-        <button
-          onClick={handleDelete}
-          disabled={loading || !tk}
-          className="w-full px-4 py-2 rounded-lg border border-red-500/60 text-red-300 hover:bg-red-500/10 disabled:opacity-60"
-        >
-          {loading ? t('account.deleting') : t('account.deleteBtn')}
-        </button>
-
+  <div className="max-w-md mt-6 space-y-6">
+        {/* Change password first */}
         <Link
           to="/account/password"
-          className="w-full inline-block text-center px-4 py-2 rounded-lg border border-white/20 text-white hover:bg-white/10"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md border border-white/10 bg-white/10 hover:bg-white/15 text-white"
         >
           {t('changePassword.go')}
         </Link>
+
+        {/* Deactivate account */}
+        <button
+          onClick={handleDelete}
+          disabled={loading || !tk}
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md border border-red-600/60 bg-red-500/10 hover:bg-red-500/20 text-red-200 disabled:opacity-60"
+        >
+          {loading ? t('account.deleting') : t('account.deleteBtn')}
+        </button>
       </div>
     </section>
   )
