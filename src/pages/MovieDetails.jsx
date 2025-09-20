@@ -1,57 +1,51 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { fetchMovie } from '../lib/api/movies'
-import FavoriteButton from '../components/FavoriteButton'
+// src/pages/MovieDetails.jsx
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { fetchMovie } from '../lib/api/movies';
+import FavoriteButton from '../components/FavoriteButton';
+import MovieReviews from '../components/MovieReviews';
 
 export default function MovieDetails() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { t, i18n } = useTranslation('common')
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t, i18n } = useTranslation('common');
+  const tmdbLang = i18n.language?.startsWith('fi') ? 'fi-FI' : 'en-US';
 
-  const tmdbLang = i18n.language?.startsWith('fi') ? 'fi-FI' : 'en-US'
-
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    let ignore = false
-    setLoading(true); setError(null)
+    let ignore = false;
+    setLoading(true); setError(null);
     fetchMovie(id, tmdbLang)
-      .then(d => { if (!ignore) setData(d) })
-      .catch(e => { if (!ignore) setError(e.message) })
-      .finally(() => { if (!ignore) setLoading(false) })
-    return () => { ignore = true }
-  }, [id, tmdbLang])
+      .then(d => { if (!ignore) setData(d); })
+      .catch(e => { if (!ignore) setError(e.message); })
+      .finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
+  }, [id, tmdbLang]);
 
   useEffect(() => {
     if (data?.title) {
-      const year = (data.release_date || '').slice(0, 4)
-      document.title = `${data.title}${year ? ` (${year})` : ''} – Movie App`
+      const year = (data.release_date || '').slice(0, 4);
+      document.title = `${data.title}${year ? ` (${year})` : ''} – Movie App`;
     }
-  }, [data])
+  }, [data]);
 
-  const year = (data?.release_date || '').slice(0, 4)
-  const runtimeText = useMemo(() => (data?.runtime ? minsToHhMm(data.runtime, i18n.language) : ''), [data, i18n.language])
-  const trailerUrl = data?.trailer?.key ? `https://www.youtube.com/watch?v=${data.trailer.key}` : null
+  const year = (data?.release_date || '').slice(0, 4);
+  const runtimeText = useMemo(
+    () => (data?.runtime ? minsToHhMm(data.runtime, i18n.language) : ''),
+    [data, i18n.language]
+  );
+  const trailerUrl = data?.trailer?.key ? `https://www.youtube.com/watch?v=${data.trailer.key}` : null;
 
   function goBack() {
-    const from = location.state?.from
-    // If we navigated here from within the app and have history, go back.
-    if (from && window.history.length > 1) {
-      navigate(-1)
-      return
-    }
-    // If we have an explicit origin but no history (e.g., opened in a new tab),
-    // navigate directly to that route.
-    if (from?.pathname) {
-      navigate(from.pathname + (from.search || ''))
-      return
-    }
-    // Fallback to search when no context is available.
-    navigate('/search')
+    const from = location.state?.from;
+    if (from && window.history.length > 1) { navigate(-1); return; }
+    if (from?.pathname) { navigate(from.pathname + (from.search || '')); return; }
+    navigate('/search');
   }
 
   if (loading) {
@@ -61,7 +55,7 @@ export default function MovieDetails() {
         <div className="animate-pulse h-6 w-1/2 rounded bg-neutral-800/60 mb-2" />
         <div className="animate-pulse h-4 w-2/3 rounded bg-neutral-800/60" />
       </div>
-    )
+    );
   }
   if (error) {
     return (
@@ -71,9 +65,9 @@ export default function MovieDetails() {
         </button>
         <div className="rounded-2xl bg-red-500/10 text-red-300 p-4">{error}</div>
       </div>
-    )
+    );
   }
-  if (!data) return null
+  if (!data) return null;
 
   return (
     <div>
@@ -126,7 +120,6 @@ export default function MovieDetails() {
                 {data.title} {year && <span className="text-white/70">({year})</span>}
               </h1>
 
-              {/* Meta */}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-300">
                 {runtimeText && <span>{runtimeText}</span>}
                 {data.certification && <span className="rounded border border-white/20 px-1.5 py-0.5">{data.certification}</span>}
@@ -139,12 +132,10 @@ export default function MovieDetails() {
                 )}
                 <span className="inline-flex items-center gap-2">
                   ⭐ {data.vote_average ?? '–'}
-                  {/* Favorite toggle visible on details page */}
                   <FavoriteButton movieId={Number(id)} inline className="ml-1" />
                 </span>
               </div>
 
-              {/* Overview */}
               {data.overview && (
                 <>
                   <h2 className="mt-4 text-lg font-medium">{t('moviePage.overview')}</h2>
@@ -152,7 +143,6 @@ export default function MovieDetails() {
                 </>
               )}
 
-              {/* Directors */}
               {data.directors?.length > 0 && (
                 <div className="mt-4">
                   <div className="text-sm text-neutral-400">{t('moviePage.director')}</div>
@@ -186,6 +176,11 @@ export default function MovieDetails() {
             </section>
           )}
 
+          {/* ⬇️ Блок отзывов */}
+          <section className="mt-8">
+            <MovieReviews />
+          </section>
+
           {/* Recommendations */}
           {data.recommendations?.length > 0 && (
             <section className="mt-8">
@@ -214,13 +209,13 @@ export default function MovieDetails() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-// --- helpers ---
+// helpers
 function minsToHhMm(mins, lang = 'en') {
-  const h = Math.floor(mins / 60)
-  const m = mins % 60
-  if (lang.startsWith('fi')) return `${h} h ${m} min`
-  return `${h}h ${m}m`
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (lang.startsWith('fi')) return `${h} h ${m} min`;
+  return `${h}h ${m}m`;
 }
