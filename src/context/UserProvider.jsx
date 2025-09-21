@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { UserContext } from './UserContext'
+export { useUser } from './useUser'
 
 export default function UserProvider({ children }) {
   const [form, setForm] = useState({ email: '', password: '' })
