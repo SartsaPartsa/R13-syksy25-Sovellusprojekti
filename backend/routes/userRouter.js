@@ -119,7 +119,6 @@ router.post('/signin', (req, res, next) => {
   })
 })
 
-
 router.delete('/me', auth, async (req, res) => {
   const userId = req.user?.id
   if (!userId) return res.status(401).json({ error: 'Unauthorized' })
@@ -129,15 +128,20 @@ router.delete('/me', auth, async (req, res) => {
     await client.query('BEGIN')
 
     
+    
+    const del = await client.query('DELETE FROM "user" WHERE id = $1', [userId])
 
-    const { rowCount } = await client.query('DELETE FROM "user" WHERE id = $1', [userId])
     await client.query('COMMIT')
 
-    if (rowCount === 0) return res.status(404).json({ error: 'User not found' })
+    if (del.rowCount === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    
     return res.status(204).send()
   } catch (e) {
     await client.query('ROLLBACK')
-    console.error(e)
+    console.error('[DELETE /api/user/me] failed:', e)
     return res.status(500).json({ error: 'Failed to delete account' })
   } finally {
     client.release()
