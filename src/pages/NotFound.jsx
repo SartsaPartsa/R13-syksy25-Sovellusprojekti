@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
+// 404 page
 export default function NotFound() {
   const { t } = useTranslation('common')
 
@@ -13,7 +14,8 @@ export default function NotFound() {
         <Link
           to="/"
           className="mt-6 inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-[#F18800] text-black font-medium hover:opacity-90"
->
+        >
+          {/* Back to home */}
           {t('notFound.backHome')}
         </Link>
       </div>

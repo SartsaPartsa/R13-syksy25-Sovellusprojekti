@@ -1,14 +1,18 @@
+// Postgres pool helper
+// uses env vars, switches DB for tests
+
 import pkg from 'pg'
 import dotenv from 'dotenv'
 
-
-const environment = process.env.NODE_ENV || 'development' 
-dotenv.config()
+// runtime environment, defaults to development
+const environment = process.env.NODE_ENV || 'development'
+dotenv.config() // load variables from .env
 
 const port = process.env.port
 const { Pool } = pkg
 
-const openDb = () => { 
+// build pool from env
+const openDb = () => {
   const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -21,5 +25,6 @@ const openDb = () => {
   return pool
 }
 
+// shared pool
 const pool = openDb()
 export { pool }

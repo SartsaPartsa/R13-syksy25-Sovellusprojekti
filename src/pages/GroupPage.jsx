@@ -175,8 +175,8 @@ export default function GroupPage() {
                                 return
                             }
                         }
-                        // Try fetching movies regardless; will succeed if approved/owner, 403 otherwise
-                        // Fetch movies; if approval just happened, we may need to retry briefly
+                        // Try fetching movies regardless: will succeed if approved/owner, 403 otherwise
+                        // Fetch movies: if approval just happened, we may need to retry briefly
                         refreshMoviesWithRetry()
                     })
                     es.addEventListener('movies-changed', () => {
@@ -184,7 +184,7 @@ export default function GroupPage() {
                         GroupsAPI.movies(id).then(setMovies).catch(() => { })
                     })
                     es.addEventListener('group-deleted', () => {
-                        // Group was deleted while this page is open → redirect to list
+                        // Group was deleted while this page is open > redirect to list
                         toast?.info?.(t('groupsPage.deletedRedirect'))
                         navigate('/groups')
                     })

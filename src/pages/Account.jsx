@@ -1,4 +1,3 @@
-// src/pages/Account.jsx
 import { useUser } from '../context/useUser'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
@@ -7,23 +6,27 @@ import { deleteMyAccount } from '../lib/api.js'
 import { toast } from 'react-toastify'
 
 export default function Account() {
+  // user and auth
   const { user, token, signOut } = useUser()
+  // translations
   const { t } = useTranslation('common')
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState('')
 
+  // derive email from context or localStorage
   const email = useMemo(() => {
     if (user?.email) return user.email
     try { return JSON.parse(localStorage.getItem('auth'))?.user?.email || '' } catch { return '' }
   }, [user])
 
+  // get token from context or localStorage
   const tk = useMemo(() => {
     if (token) return token
     try { return JSON.parse(localStorage.getItem('auth'))?.token || '' } catch { return '' }
   }, [token])
 
-  // Тост-подтверждение (возвращает true/false)
+  // Show a confirm toast, resolve true or false
   function confirmDeleteToast() {
     return new Promise((resolve) => {
       let id
@@ -47,11 +50,11 @@ export default function Account() {
   const handleDelete = async () => {
     setErr('')
 
-    // 1) Подтверждение тостом
+    // Confirm with toast
     const ok = await confirmDeleteToast()
     if (!ok) return
 
-    // 2) Проверка токена
+    // Check token
     if (!tk) {
       const msg = 'No token provided — kirjaudu sisään uudelleen.'
       setErr(msg)
@@ -59,22 +62,22 @@ export default function Account() {
       return
     }
 
-    // 3) Процесс → успех/ошибка
+    // Run delete, show success or error
     setLoading(true)
-    const tid = toast.loading(t('account.deleting')) // “Poistetaan…”
+    const tid = toast.loading(t('account.deleting')) // “Deleting…”
     try {
       await deleteMyAccount(tk)
 
       toast.update(tid, {
-        render: t('account.deleted'),  // “Tili poistettu.”
+        render: t('account.deleted'),  // “Account deleted.”
         type: 'success',
         isLoading: false,
         autoClose: 2200,
       })
 
-      try { localStorage.removeItem('auth') } catch {}
+      try { localStorage.removeItem('auth') } catch { }
       signOut?.()
-      // лёгкая пауза, чтобы тост не «съедался» навигацией
+      // short delay so toast stays visible before navigation
       setTimeout(() => navigate('/', { replace: true }), 50)
     } catch (e) {
       const msg = e?.message || t('account.deleteFailed', 'Failed to delete account')
@@ -94,11 +97,12 @@ export default function Account() {
         <p className="text-white font-mono">{email}</p>
       </div>
 
+      {/* Errors and auth state */}
       {err && <p className="text-red-400 text-sm mt-3">{err}</p>}
       {!tk && <p className="text-amber-300 text-sm mt-2">No token provided — kirjaudu sisään uudelleen.</p>}
 
-  <div className="max-w-md mt-6 space-y-6">
-        {/* Change password first */}
+      <div className="max-w-md mt-6 space-y-6">
+        {/* Link to change password */}
         <Link
           to="/account/password"
           className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md border border-white/10 bg-white/10 hover:bg-white/15 text-white"
@@ -106,7 +110,7 @@ export default function Account() {
           {t('changePassword.go')}
         </Link>
 
-        {/* Deactivate account */}
+        {/* Delete account */}
         <button
           onClick={handleDelete}
           disabled={loading || !tk}

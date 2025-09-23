@@ -15,11 +15,11 @@ export function FancySelect({
   const btnRef = useRef(null)
   const panelRef = useRef(null)
 
-  // Current label from options or placeholder
+  // Determine label from selected option or fallback to placeholder
   const selected = options.find((o) => o.value === value)
   const label = selected?.label || placeholder || ''
 
-  // Close on outside click/touch or Escape
+  // Close dropdown when clicking outside, touching outside, or pressing Escape
   useEffect(() => {
     if (!open) return
     const handler = (e) => {
@@ -43,7 +43,7 @@ export function FancySelect({
     }
   }, [open])
 
-  // Default styles, overridable via props
+  // Default classes for trigger and panel; props can override
   const triggerClass = buttonClassName || 'h-10 inline-flex items-center gap-2 rounded-md bg-gray-800/60 px-3 pr-8 text-sm text-white ring-1 ring-white/10 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#F18800]'
   const panelCls = panelClassName || `absolute z-50 mt-2 top-full ${align === 'right' ? 'right-0' : 'left-0'} min-w-[14rem] bg-gray-900/95 backdrop-blur-md border border-white/10 rounded-lg shadow-lg p-1`
 
@@ -55,9 +55,9 @@ export function FancySelect({
         onClick={() => setOpen((v) => !v)}
         className={triggerClass}
       >
-        {/* Visible value/placeholder */}
-  <span className={`block ${labelClassName}`}>{label}</span>
-        {/* Caret icon */}
+        {/* Display selected value or placeholder */}
+        <span className={`block ${labelClassName}`}>{label}</span>
+        {/* Dropdown caret icon (visual only) */}
         <svg
           className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300"
           viewBox="0 0 20 20"
@@ -81,13 +81,13 @@ export function FancySelect({
                     onClick={() => { onChange?.(o.value); setOpen(false) }}
                   >
                     <span className="inline-flex items-center gap-2">
-                      {/* Check icon for selected option */}
+                      {/* Show check icon for the selected item */}
                       {active && (
                         <svg className="h-4 w-4 text-[#F18800]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                           <path fillRule="evenodd" d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.07 7.07a1 1 0 0 1-1.415 0L3.29 9.838a1 1 0 1 1 1.415-1.415l3.239 3.239 6.364-6.364a1 1 0 0 1 1.396-.008z" clipRule="evenodd" />
                         </svg>
                       )}
-                      {/* Dropdown items: original single-line truncation */}
+                      {/* Item label (truncated if too long) */}
                       <span className="truncate">{o.label}</span>
                     </span>
                   </button>

@@ -23,16 +23,16 @@ export default function Groups() {
     let es
     let retry
 
-    ;(async () => {
-      try {
-        const data = await GroupsAPI.list()
-        if (!cancelled) setGroups(Array.isArray(data) ? data : [])
-      } catch (e) {
-        if (!cancelled) setError(e)
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          const data = await GroupsAPI.list()
+          if (!cancelled) setGroups(Array.isArray(data) ? data : [])
+        } catch (e) {
+          if (!cancelled) setError(e)
+        } finally {
+          if (!cancelled) setLoading(false)
+        }
+      })()
 
     // SSE: listen for server events that notify about group list changes
     const start = () => {
@@ -43,13 +43,13 @@ export default function Groups() {
         const reload = () => {
           GroupsAPI.list()
             .then((d) => { if (!cancelled) setGroups(Array.isArray(d) ? d : []) })
-            .catch(() => {})
+            .catch(() => { })
         }
         es.addEventListener('group-created', reload)
         es.addEventListener('group-deleted', reload)
         es.addEventListener('group-updated', reload)
         es.onerror = () => {
-          try { es?.close() } catch {}
+          try { es?.close() } catch { }
           if (!cancelled) retry = setTimeout(start, 3000)
         }
       } catch {
@@ -57,23 +57,23 @@ export default function Groups() {
       }
     }
     start()
-    return () => { cancelled = true; try { es?.close() } catch {}; if (retry) clearTimeout(retry) }
+    return () => { cancelled = true; try { es?.close() } catch { }; if (retry) clearTimeout(retry) }
   }, [])
 
   const onCreate = async (e) => {
     e.preventDefault()
-  setFormError(null)
+    setFormError(null)
     const trimmed = name.trim()
     if (trimmed.length === 0 || trimmed.length > 120) {
       setFormError('Name must be 1–120 characters.')
       return
     }
-  // Mark submitting to disable form
-  setSubmitting(true)
+    // Mark submitting to disable form
+    setSubmitting(true)
     try {
-  // Create group and prepend to local list on success
-  const created = await GroupsAPI.create({ name: trimmed })
-  setGroups((prev) => [created, ...prev])
+      // Create group and prepend to local list on success
+      const created = await GroupsAPI.create({ name: trimmed })
+      setGroups((prev) => [created, ...prev])
       setName('')
       setOpen(false)
       toast.success(t('groupsPage.createSuccess'))
@@ -91,8 +91,8 @@ export default function Groups() {
         {t('groups') || 'Groups'}
       </h1>
 
-  {/* Create button */}
-  <div className="mb-6">
+      {/* Create button */}
+      <div className="mb-6">
         <button
           type="button"
           className="inline-flex items-center gap-2 rounded-lg px-16 py-2 border border-white/10 bg-white/10 hover:bg-white/15 text-white"
@@ -105,7 +105,7 @@ export default function Groups() {
         </button>
       </div>
 
-  {/* Groups list: show skeleton, error, empty state or items */}
+      {/* Groups list: show skeleton, error, empty state or items */}
       {loading ? (
         <div className="space-y-3">
           <SkeletonCard />
@@ -127,7 +127,7 @@ export default function Groups() {
         </ul>
       )}
 
-  {/* Create group modal dialog (backdrop + form) */}
+      {/* Create group modal dialog (backdrop + form) */}
       {open && (
         <div className="fixed inset-0 z-50">
           {/* backdrop */}

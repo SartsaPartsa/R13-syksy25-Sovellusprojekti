@@ -1,1 +1,5 @@
+/*
+ Short note: Tailwind CSS is a utility-first CSS framework.
+ This file pulls in Tailwind so we can use utility classes in JSX.
+ */
 @import "tailwindcss";

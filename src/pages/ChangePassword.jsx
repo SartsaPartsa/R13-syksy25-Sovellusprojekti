@@ -1,4 +1,3 @@
-// src/pages/ChangePassword.jsx
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useUser } from '../context/useUser'
@@ -18,7 +17,7 @@ export default function ChangePassword() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-  
+    // basic validation
     if (!form.currentPassword || !form.newPassword) {
       toast.error(t('changePassword.errors.missing')); return
     }
@@ -32,7 +31,7 @@ export default function ChangePassword() {
       toast.error(t('changePassword.errors.sameAsOld')); return
     }
 
-    
+    // get token from context or localStorage
     const tk =
       token ||
       (JSON.parse(localStorage.getItem('auth') || 'null')?.token ?? '')
@@ -45,7 +44,7 @@ export default function ChangePassword() {
     try {
       setLoading(true)
 
-    
+      // call API and show toast state
       await toast.promise(
         changeMyPassword(form.currentPassword, form.newPassword, tk),
         {
@@ -53,19 +52,18 @@ export default function ChangePassword() {
           success: t('changePassword.success'),
           error: {
             render({ data }) {
-              
               return data?.message || t('changePassword.errors.failed')
             }
           }
         }
       )
 
-      
-      try { localStorage.removeItem('auth') } catch {}
+      // clear auth and sign out after success
+      try { localStorage.removeItem('auth') } catch { }
       signOut?.()
       navigate('/login', { replace: true })
     } catch {
-      
+      // ignore, toast already shows error
     } finally {
       setLoading(false)
     }
@@ -77,6 +75,7 @@ export default function ChangePassword() {
         <h1 className="text-2xl font-semibold text-white">{t('changePassword.title')}</h1>
         <p className="text-white/70 mt-1">{t('changePassword.lead')}</p>
 
+        {/* Change password form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
             <label className="block text-sm text-white/80 mb-1">{t('changePassword.current')}</label>
@@ -112,6 +111,7 @@ export default function ChangePassword() {
             />
           </div>
 
+          {/* Save new password */}
           <button
             type="submit"
             disabled={loading}
@@ -121,6 +121,7 @@ export default function ChangePassword() {
           </button>
         </form>
 
+        {/* Back link */}
         <div className="mt-4">
           <Link to="/account" className="text-blue-400 hover:underline">
             {t('changePassword.back')}

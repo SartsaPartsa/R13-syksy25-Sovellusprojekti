@@ -5,14 +5,17 @@ import { FavoritesAPI } from '../lib/api'
 import { fetchMovie } from '../lib/api/movies'
 
 export default function SharedFavorites() {
+  // View a shared favorites list by slug
   const { slug } = useParams()
   const { t } = useTranslation('common')
   const location = useLocation()
+  // state: list metadata and movie objects
   const [meta, setMeta] = useState(null)
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  // load shared list meta and its movies
   useEffect(() => {
     let ignore = false
     async function load() {
@@ -37,12 +40,14 @@ export default function SharedFavorites() {
       <h1 className="text-2xl font-semibold mb-6">{t('favoritesPage.title')}</h1>
       {loading && <div className="text-neutral-300">{t('loading')}</div>}
       {error && <div className="text-red-300">{t('errorFetchingData')}: {error}</div>}
+      {/* shared list header */}
       {meta && (
         <div className="mb-4 text-sm text-neutral-300">{t('favoritesShare.viewing')}: <span className="text-white font-medium">{meta.display_name}</span></div>
       )}
       {!loading && movies.length === 0 && (
         <div className="text-neutral-300">{t('favoritesShare.emptyShared')}</div>
       )}
+      {/* Movie grid */}
       <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {movies.map((m) => (
           <li key={m.id}
@@ -55,6 +60,7 @@ export default function SharedFavorites() {
                 ) : (
                   <div className="w-full h-64 bg-neutral-700 flex items-center justify-center text-neutral-400">{t('movie.noImage')}</div>
                 )}
+                {/* rating badge */}
                 <div className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-xs text-white ring-1 ring-white/10">⭐ {m.vote_average ?? '–'}</div>
               </div>
               <div className="p-3">

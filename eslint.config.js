@@ -34,7 +34,7 @@ export default [
     },
     rules: {
       'react/prop-types': 'off',
-  'no-empty': ['error', { allowEmptyCatch: true }],
+      'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
 ]

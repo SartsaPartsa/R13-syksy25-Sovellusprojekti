@@ -1,21 +1,22 @@
 import { useContext } from 'react';
-import { UserContext } from '../context/UserContext'; 
-import { api } from '../lib/api'; 
+import { UserContext } from '../context/UserContext';
+import { api } from '../lib/api';
 import { FaHeart } from "react-icons/fa";
 
-// Nappi, jolla lisätään tai poistetaan elokuva suosikeista
+// Button to add/remove a movie from favorites
 export default function FavoriteButton({ movieId, inline = false, className = '' }) {
-  // Haetaan käyttäjä ja hänen suosikkinsa
+  // Get user state and favorites from context
   const { authUser, isAuthenticated, favorites, setFavorites } = useContext(UserContext);
 
-  // Onko tämä elokuva jo suosikeissa?
+  // Check if this movie is already in favorites
   const isFavorite = favorites.has(movieId);
 
-  // Kun nappia painetaan
+  // Handle button click
   const toggleFavorite = async () => {
     if (!authUser) return; // Jos ei ole kirjautunut → ei tehdä mitään
+    // If not logged in, do nothing
 
-    // Vaihdetaan sydämen tila heti näkyviin
+    // Optimistically update local favorites so UI feels instant
     const newFavorites = new Set(favorites);
     if (isFavorite) {
       newFavorites.delete(movieId); // poista suosikeista
@@ -25,7 +26,7 @@ export default function FavoriteButton({ movieId, inline = false, className = ''
     setFavorites(newFavorites);
 
     try {
-      // Kerrotaan palvelimelle muutos
+      // Send change to server
       if (isFavorite) {
         await api(`/api/favorites/${authUser.id}/${movieId}`, { method: 'DELETE' });
       } else {
@@ -38,7 +39,7 @@ export default function FavoriteButton({ movieId, inline = false, className = ''
     } catch (error) {
       console.error('Virhe:', error);
 
-      // Jos palvelin ei onnistunut → palauta vanha sydäntilanne
+      // If server update failed, roll back the local change
       const rollback = new Set(favorites);
       if (isFavorite) {
         rollback.add(movieId);
@@ -49,7 +50,7 @@ export default function FavoriteButton({ movieId, inline = false, className = ''
     }
   };
 
-  // Jos ei ole kirjautunut niin nappia ei näytetä ollenkaan
+  // Hide button if user is not authenticated
   if (!authUser || !isAuthenticated) return null;
 
   const overlayBtnCls = "absolute top-2 right-2 p-2 text-red-500 hover:text-red-600 transition-colors z-10"
