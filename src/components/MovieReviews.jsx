@@ -10,35 +10,37 @@ export default function MovieReviews({ movieId: propMovieId }) {
   const routeParams = useParams();
   const movieId = Number(propMovieId ?? routeParams.id);
 
-  const { authUser, token } = useUser(); // { id, email }, token (JWT)
+  const { authUser, token } = useUser(); // User info ({ id, email }) and auth token (JWT)
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
 
-  // форма моего отзыва
+  // Form state for the user's own review
   const [myRating, setMyRating] = useState(0);
   const [myText, setMyText] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Find the current user's review in the list (if any)
   const myReview = useMemo(
     () => list.find(r => authUser && r.user_id === authUser.id),
     [list, authUser]
   );
 
+  // Fetch reviews for the movie. ignore flag prevents state update after unmount
   useEffect(() => {
     let ignore = false;
     setLoading(true); setErr('');
     getReviews(movieId)
       .then(rows => { if (!ignore) setList(rows || []); })
-      .catch(e => { 
-        if (!ignore) setErr(e.message || 'Failed to load reviews'); 
+      .catch(e => {
+        if (!ignore) setErr(e.message || 'Failed to load reviews');
         toast.error(t('review.loadFailed', 'Arvostelujen lataus epäonnistui.'))
       })
       .finally(() => { if (!ignore) setLoading(false); });
     return () => { ignore = true; };
   }, [movieId]);
 
-  // предзаполняем форму, если свой отзыв уже есть
+  // Pre-fill the form if the user already has a review
   useEffect(() => {
     if (myReview) {
       setMyRating(myReview.rating);
@@ -49,24 +51,26 @@ export default function MovieReviews({ movieId: propMovieId }) {
     }
   }, [myReview]);
 
+  // Save or update the user's review
   async function onSave() {
     try {
       setSaving(true);
       setErr('');
-  const tid = toast.loading(t('review.saving', 'Tallennetaan…'), { closeButton: true });
-  const saved = await addOrUpdateMyReview(movieId, { rating: myRating, text: myText }, token);
-      // Обновим список (либо refetch, либо локально)
-  const next = list.filter(r => !(authUser && r.user_id === authUser.id));
-  setList([{ ...saved, user_email: authUser.email, user_id: authUser.id }, ...next]);
-  toast.update(tid, { render: t('review.saved', 'Arvostelu tallennettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
+      const tid = toast.loading(t('review.saving', 'Tallennetaan…'), { closeButton: true });
+      const saved = await addOrUpdateMyReview(movieId, { rating: myRating, text: myText }, token);
+      // Update list locally with the saved review (avoid refetch)
+      const next = list.filter(r => !(authUser && r.user_id === authUser.id));
+      setList([{ ...saved, user_email: authUser.email, user_id: authUser.id }, ...next]);
+      toast.update(tid, { render: t('review.saved', 'Arvostelu tallennettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
     } catch (e) {
       setErr(e.message || 'Failed to save');
-  toast.error(t('review.saveFailed', 'Tallennus epäonnistui.'), { closeButton: true });
+      toast.error(t('review.saveFailed', 'Tallennus epäonnistui.'), { closeButton: true });
     } finally {
       setSaving(false);
     }
   }
 
+  // Delete the current user's review
   async function onDelete() {
     if (!myReview) return;
     const ok = await confirmReviewDeleteToast(t);
@@ -74,41 +78,41 @@ export default function MovieReviews({ movieId: propMovieId }) {
     try {
       setSaving(true);
       setErr('');
-  const tid = toast.loading(t('review.deleting', 'Poistetaan…'), { closeButton: true });
+      const tid = toast.loading(t('review.deleting', 'Poistetaan…'), { closeButton: true });
       await deleteMyReview(movieId, myReview.id, token);
       setList(list.filter(r => r.id !== myReview.id));
       setMyRating(0);
       setMyText('');
-  toast.update(tid, { render: t('review.deleted', 'Arvostelu poistettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
+      toast.update(tid, { render: t('review.deleted', 'Arvostelu poistettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
     } catch (e) {
       setErr(e.message || 'Failed to delete');
-  toast.error(t('review.deleteFailed', 'Poisto epäonnistui.'), { closeButton: true });
+      toast.error(t('review.deleteFailed', 'Poisto epäonnistui.'), { closeButton: true });
     } finally {
       setSaving(false);
     }
   }
 
-  // Poista tietty listan arvostelu (vain omat)
+  // Delete a specific review from the list (only user's own)
   async function onDeleteItem(r) {
-  if (!r || !authUser || r.user_id !== authUser.id) return;
+    if (!r || !authUser || r.user_id !== authUser.id) return;
     const ok = await confirmReviewDeleteToast(t);
     if (!ok) return;
     try {
-  const tid = toast.loading(t('review.deleting', 'Poistetaan…'), { closeButton: true });
+      const tid = toast.loading(t('review.deleting', 'Poistetaan…'), { closeButton: true });
       await deleteMyReview(movieId, r.id, token);
       setList(prev => prev.filter(x => x.id !== r.id));
-      // Jos poistettu on juuri oma "myReview", nollaa lomake
+      // If deleted is just my "myReview", reset the form
       if (myReview && myReview.id === r.id) {
         setMyRating(0);
         setMyText('');
       }
-  toast.update(tid, { render: t('review.deleted', 'Arvostelu poistettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
+      toast.update(tid, { render: t('review.deleted', 'Arvostelu poistettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
     } catch (e) {
-  toast.error(t('review.deleteFailed', 'Poisto epäonnistui.'), { closeButton: true });
+      toast.error(t('review.deleteFailed', 'Poisto epäonnistui.'), { closeButton: true });
     }
   }
 
-  // Styled confirmation (same visual style as group/account delete toast)
+  // Show a styled confirmation toast for deleting a review
   function confirmReviewDeleteToast(t) {
     return new Promise((resolve) => {
       let id
@@ -126,6 +130,7 @@ export default function MovieReviews({ movieId: propMovieId }) {
     })
   }
 
+  // Star button used for selecting rating
   function Star({ value }) {
     const active = value <= (myRating || 0);
     return (
@@ -144,12 +149,12 @@ export default function MovieReviews({ movieId: propMovieId }) {
     <div>
       <h3 className="text-lg font-medium mb-2">{t('moviePage.reviews', 'Arvostelut')}</h3>
 
-      {/* Oma arvostelu: näytetään lomake vain jos käyttäjällä EI ole vielä arvostelua */}
-  {!loading && authUser && !myReview ? (
+      {/* My review form: shown when logged in and no existing review */}
+      {!loading && authUser && !myReview ? (
         <div className="rounded-2xl ring-1 ring-white/10 bg-neutral-800/50 p-3 mb-4">
           <div className="text-sm text-neutral-300 mb-1">{t('review.myReview', 'Oma arvostelu')}</div>
           <div className="flex items-center gap-1 mb-2">
-            {[1,2,3,4,5].map(v => <Star key={v} value={v} />)}
+            {[1, 2, 3, 4, 5].map(v => <Star key={v} value={v} />)}
           </div>
           <textarea
             className="w-full rounded-xl bg-neutral-900/60 ring-1 ring-white/10 p-2 outline-none focus:ring-[#F18800]"
@@ -184,7 +189,7 @@ export default function MovieReviews({ movieId: propMovieId }) {
         </div>
       ) : null}
 
-      {/* Список всех отзывов к фильму */}
+      {/* List of all reviews for this movie */}
       {loading && <div className="text-neutral-400">{t('loading', 'Ladataan…')}</div>}
       {!loading && list.length === 0 && <div className="text-neutral-400">{t('reviewPage.empty', 'Ei arvosteluja vielä.')}</div>}
       <ul className="space-y-3">
@@ -201,7 +206,12 @@ export default function MovieReviews({ movieId: propMovieId }) {
                 </button>
               )}
             </div>
-            <div className="mt-2 text-white whitespace-pre-wrap">{r.text}</div>
+            <div
+              className="mt-2 text-white whitespace-pre-wrap break-words overflow-x-hidden"
+              style={{ overflowWrap: 'anywhere' }}
+            >
+              {r.text}
+            </div>
             <div className="mt-1 text-sm text-neutral-300">{r.user_email}</div>
             <div className="mt-1 text-xs text-neutral-400">{new Date(r.created_at).toLocaleString()}</div>
           </li>

@@ -5,9 +5,7 @@ import { useUser } from '../context/useUser'
 import FancySelect from './FancySelect'
 
 // Navbar: responsive top bar with navigation, search, language and theater pickers
-
 // Navigation links used by both desktop and mobile menus
-// Navigation links always visible
 const LINKS = [
   { to: '/', key: 'home' },
   { to: '/theaters', key: 'theaters' },
@@ -17,13 +15,15 @@ const LINKS = [
 ]
 
 // Links visible only when user is logged in
-const AUTH_LINKS = [ { to: '/account', key: 'myAccount' } ]
+const AUTH_LINKS = [{ to: '/account', key: 'myAccount' }]
 
 // Navbar: responsive top navigation with search, language and theater selectors
 export function Navbar() {
-  const [open, setOpen] = useState(false) // mobile menu
-  const [searchOpen, setSearchOpen] = useState(false) // floating search panel
+  const [open, setOpen] = useState(false) // mobile menu open state
+  const [searchOpen, setSearchOpen] = useState(false) // floating search panel open state
   const searchPanelRef = useRef(null)
+  const mobileMenuRef = useRef(null) // ref to mobile dropdown panel
+  const burgerBtnRef = useRef(null) // ref to burger toggle button
   const searchBtnDesktopRef = useRef(null)
   const searchBtnMobileRef = useRef(null)
   const { t, i18n } = useTranslation('common')
@@ -41,15 +41,15 @@ export function Navbar() {
   const [selectedTheater, setSelectedTheater] = useState('')
 
   // Keep login state in sync with auth context
-  useEffect(() => { 
-    setUserLoggedIn(isAuthenticated) 
+  useEffect(() => {
+    setUserLoggedIn(isAuthenticated)
   }, [isAuthenticated])
 
   // Logout and redirect to home
-   function logout() {
-     ctxLogout()
-     navigate('/')
-   }
+  function logout() {
+    ctxLogout()
+    navigate('/')
+  }
 
   // Perform global search and close popovers
   function submitSearch() {
@@ -61,13 +61,13 @@ export function Navbar() {
     setOpen(false)
   }
 
-  // Change UI language
+  // Change UI language and persist preference
   const changeLang = (lng) => {
     i18n.changeLanguage(lng)
-    try { localStorage.setItem('lang', lng) } catch {}
+    try { localStorage.setItem('lang', lng) } catch { }
   }
 
-  // Global keyboard/resize handlers
+  // Global keyboard and resize handlers
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') { setOpen(false); setSearchOpen(false) }
@@ -101,7 +101,26 @@ export function Navbar() {
     }
   }, [searchOpen])
 
-  // Fetch theaters once (Finnkino XML API)
+  // Close mobile dropdown when clicking outside
+  useEffect(() => {
+    if (!open) return
+    const onOutside = (e) => {
+      const t = e.target
+      const panel = mobileMenuRef.current
+      const burger = burgerBtnRef.current
+      // If click is inside the menu or on the toggle button, ignore
+      if ((panel && panel.contains(t)) || (burger && burger.contains(t))) return
+      setOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    document.addEventListener('touchstart', onOutside)
+    return () => {
+      document.removeEventListener('mousedown', onOutside)
+      document.removeEventListener('touchstart', onOutside)
+    }
+  }, [open])
+
+  // Fetch theaters once from Finnkino XML API
   useEffect(() => {
     let aborted = false
     async function load() {
@@ -119,7 +138,7 @@ export function Navbar() {
           // Remove placeholder entries (Finnish/English)
           .filter(x => !/valitse\s+alue\/?teatteri/i.test(x.name) && !/choose\s+area\/?theater/i.test(x.name))
         setTheaters(list)
-  } catch {
+      } catch {
         // Silent in navbar; Theaters page remains usable
       } finally {
         if (!aborted) setTheatersLoading(false)
@@ -136,12 +155,12 @@ export function Navbar() {
     if (area !== selectedTheater) setSelectedTheater(area)
   }, [location.search])
 
-  // Pretty theater names
+  // Pretty theater names for UI
   const cleanTheaterName = (name) =>
     name?.replace(/\s*\((?:pl\.?|excl\.?)\s*Espoo\)\s*$/i, '') || ''
   const theaterOptions = theaters.map(t => ({ value: t.id, label: cleanTheaterName(t.name) }))
 
-  // Navigate to theater page on select
+  // Navigate to theater page when a theater is selected
   function onSelectTheater(id) {
     setSelectedTheater(id)
     navigate(`/theaters?area=${encodeURIComponent(id)}`)
@@ -173,8 +192,7 @@ export function Navbar() {
                   end={l.to === '/'}
                   onClick={() => { setOpen(false); setSearchOpen(false) }}
                   className={({ isActive }) =>
-                    `block rounded-md px-4 py-2 transition-colors font-medium ${
-                      isActive ? 'bg-white/15 text-white' : 'text-gray-100 hover:text-white hover:bg-white/10'
+                    `block rounded-md px-4 py-2 transition-colors font-medium ${isActive ? 'bg-white/15 text-white' : 'text-gray-100 hover:text-white hover:bg-white/10'
                     }`
                   }
                 >
@@ -203,22 +221,22 @@ export function Navbar() {
             />
 
             {/* Auth button */}
-              {userLoggedIn ? (
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="inline-flex items-center bg-[#F18800] hover:bg-[#F18800]/90 text-black font-medium px-4 rounded-md h-10 transition-colors shadow-sm ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]/60"
-                >
-                  {t('logout')}
-                </button>
-              ) : (
-                <Link
-                  to="/login"
-                  className="inline-flex items-center bg-[#F18800] hover:bg-[#F18800]/90 text-black font-medium px-4 rounded-md h-10 transition-colors shadow-sm ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]/60"
-                >
-                  {t('login')}
-                </Link>
-              )}
+            {userLoggedIn ? (
+              <button
+                type="button"
+                onClick={logout}
+                className="inline-flex items-center bg-[#F18800] hover:bg-[#F18800]/90 text-black font-medium px-4 rounded-md h-10 transition-colors shadow-sm ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]/60"
+              >
+                {t('logout')}
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="inline-flex items-center bg-[#F18800] hover:bg-[#F18800]/90 text-black font-medium px-4 rounded-md h-10 transition-colors shadow-sm ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]/60"
+              >
+                {t('login')}
+              </Link>
+            )}
 
             {/* Search (desktop) */}
             <button
@@ -255,6 +273,7 @@ export function Navbar() {
             aria-expanded={open}
             onClick={() => setOpen(v => !v)}
             className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-white hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F18800]"
+            ref={burgerBtnRef}
           >
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               {open ? (
@@ -280,31 +299,31 @@ export function Navbar() {
                 <label className="sr-only" htmlFor="global-search">{t('search')}</label>
                 <input
                   id="global-search"
-                      type="text"
-                      placeholder={t('search')}
-                      autoFocus
-                      value={term}
-                      onChange={(e) => setTerm(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitSearch() } }}
-                      className="w-full rounded-md bg-gray-800/60 text-white placeholder-gray-400 px-3 py-2 ring-1 ring-white/10 focus:ring-2 focus:ring-[#F18800] outline-none"
-                    />
-                    <button
-                      type="submit"
-                      aria-label={t('search')}
-                      className="inline-flex items-center justify-center rounded-md px-3 py-2 bg-white/10 hover:bg-white/20 ring-1 ring-white/10"
-                    >
-                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                     <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" />
-                   </svg>
-                 </button>
-               </form>
+                  type="text"
+                  placeholder={t('search')}
+                  autoFocus
+                  value={term}
+                  onChange={(e) => setTerm(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitSearch() } }}
+                  className="w-full rounded-md bg-gray-800/60 text-white placeholder-gray-400 px-3 py-2 ring-1 ring-white/10 focus:ring-2 focus:ring-[#F18800] outline-none"
+                />
+                <button
+                  type="submit"
+                  aria-label={t('search')}
+                  className="inline-flex items-center justify-center rounded-md px-3 py-2 bg-white/10 hover:bg-white/20 ring-1 ring-white/10"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" />
+                  </svg>
+                </button>
+              </form>
             </div>
           </div>
         )}
       </nav>
 
       {/* Mobile dropdown panel */}
-      <div className={`md:hidden absolute inset-x-0 top-16 bg-gray-900/98 backdrop-blur-xl backdrop-saturate-200 shadow-lg border-b border-white/10 ${open ? 'block' : 'hidden'}`}>
+      <div ref={mobileMenuRef} className={`md:hidden absolute inset-x-0 top-16 bg-gray-900/98 backdrop-blur-xl backdrop-saturate-200 shadow-lg border-b border-white/10 ${open ? 'block' : 'hidden'}`}>
         <ul className="list-none px-4 py-2 md:px-8 divide-y divide-white/5">
           {visibleLinks.map(l => (
             <li key={l.key}>
@@ -313,8 +332,7 @@ export function Navbar() {
                 end={l.to === '/'}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
-                  `block px-3 py-3 transition-colors ${
-                    isActive ? 'bg-white/10 text-white' : 'text-white hover:bg-white/5'
+                  `block px-3 py-3 transition-colors ${isActive ? 'bg-white/10 text-white' : 'text-white hover:bg-white/5'
                   }`
                 }
               >
@@ -335,7 +353,7 @@ export function Navbar() {
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
-              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.17l3.71-2.94a.75.75 0 1 1 .94 1.16l-4.24 3.36a.75.75 0 0 1-.94 0L5.21 8.39a.75.75 0 0 1 .02-1.18z"/></svg>
+              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.17l3.71-2.94a.75.75 0 1 1 .94 1.16l-4.24 3.36a.75.75 0 0 1-.94 0L5.21 8.39a.75.75 0 0 1 .02-1.18z" /></svg>
             </div>
           </li>
           <li className="px-1 pt-3">
@@ -348,7 +366,7 @@ export function Navbar() {
                 <option value="fi">FIN</option>
                 <option value="en">ENG</option>
               </select>
-              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.17l3.71-2.94a.75.75 0 1 1 .94 1.16l-4.24 3.36a.75.75 0 0 1-.94 0L5.21 8.39a.75.75 0 0 1 .02-1.18z"/></svg>
+              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.17l3.71-2.94a.75.75 0 1 1 .94 1.16l-4.24 3.36a.75.75 0 0 1-.94 0L5.21 8.39a.75.75 0 0 1 .02-1.18z" /></svg>
             </div>
           </li>
           <li className="px-1 pt-3 pb-2">

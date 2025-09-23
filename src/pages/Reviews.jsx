@@ -1,4 +1,3 @@
-// src/pages/Reviews.jsx
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -12,9 +11,11 @@ export default function Reviews() {
   const location = useLocation();
   const { authUser, token } = useUser();
   const [sp, setSp] = useSearchParams();
-  const page  = Math.max(1, Number(sp.get('page') || 1));
+  // pagination from query params
+  const page = Math.max(1, Number(sp.get('page') || 1));
   const limit = Math.max(1, Math.min(50, Number(sp.get('limit') || 20)));
 
+  // local state
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -22,12 +23,12 @@ export default function Reviews() {
 
   useEffect(() => {
     let ignore = false;
+    // load reviews and add minimal movie info for cards
     setLoading(true); setError('');
     fetchLatestReviews({ page, limit })
       .then(async d => {
         if (ignore) return;
         const items = Array.isArray(d.items) ? d.items : [];
-        // Enrich each review with movie poster, title and year for better card layout
         const movies = await Promise.all(items.map(async (r) => {
           try {
             const m = await fetchMovie(r.movie_id);
@@ -44,10 +45,12 @@ export default function Reviews() {
     return () => { ignore = true; };
   }, [page, limit]);
 
+  // pagination helpers
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const setPage = (p) => setSp(prev => { const q = new URLSearchParams(prev); q.set('page', String(p)); q.set('limit', String(limit)); return q; });
 
-  // Confirm review deletion (toast style, same visual language as groups)
+  // confirm delete toast
+  // show confirm toast for deleting a review
   function confirmReviewDeleteToast() {
     return new Promise((resolve) => {
       let id
@@ -59,21 +62,25 @@ export default function Reviews() {
             <button onClick={() => { toast.dismiss(id); resolve(true) }} className="px-3 py-1.5 rounded-md bg-red-500/20 hover:bg-red-500/30 border border-red-600 text-red-600">{t('review.delete', 'Poista')}</button>
           </div>
         </div>
-  ), { autoClose: false, closeOnClick: false, closeButton: true, draggable: false, hideProgressBar: true })
+      ), { autoClose: false, closeOnClick: false, closeButton: true, draggable: false, hideProgressBar: true })
     })
   }
 
+  // delete a review after confirmation
   async function onDelete(r) {
-    if (!authUser || !token) return; // not allowed
+    if (!authUser || !token) return; // require login
     const ok = await confirmReviewDeleteToast();
     if (!ok) return;
-  const tid = toast.loading(t('review.deleting', 'Poistetaan…'), { closeButton: true })
+    // show loading toast
+    const tid = toast.loading(t('review.deleting', 'Poistetaan…'), { closeButton: true })
     try {
       await deleteMyReview(r.movie_id, r.id, token);
+      // remove locally and show success
       setItems(prev => prev.filter(x => x.id !== r.id));
-  toast.update(tid, { render: t('review.deleted', 'Arvostelu poistettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
+      toast.update(tid, { render: t('review.deleted', 'Arvostelu poistettu.'), type: 'success', isLoading: false, autoClose: 2200, closeButton: true });
     } catch (e) {
-  toast.update(tid, { render: t('review.deleteFailed', 'Poisto epäonnistui.'), type: 'error', isLoading: false, autoClose: 3500, closeButton: true });
+      // show error
+      toast.update(tid, { render: t('review.deleteFailed', 'Poisto epäonnistui.'), type: 'error', isLoading: false, autoClose: 3500, closeButton: true });
     }
   }
 
@@ -81,17 +88,19 @@ export default function Reviews() {
     <div className="mx-auto max-w-4xl px-4 py-6">
       <h1 className="text-2xl font-semibold mb-4">{t('reviewPage.title', 'Arvostelut')}</h1>
 
+      {/* status messages */}
       {error && <div className="mb-4 rounded-xl bg-red-500/10 text-red-300 p-3">{error}</div>}
-      {loading && <div className="text-neutral-400">{t('loading','Ladataan…')}</div>}
+      {loading && <div className="text-neutral-400">{t('loading', 'Ladataan…')}</div>}
       {!loading && !error && items.length === 0 && (
-        <div className="text-neutral-400">{t('reviewPage.empty','Ei arvosteluja vielä.')}</div>
+        <div className="text-neutral-400">{t('reviewPage.empty', 'Ei arvosteluja vielä.')}</div>
       )}
 
+      {/* reviews list */}
       <ul className="space-y-3">
         {items.map(r => (
           <li key={r.id} className="rounded-2xl border border-white/10 bg-gray-900/60 p-4">
             <div className="flex items-start gap-4">
-              {/* Poster thumbnail (clickable – opens movie page) */}
+              {/* Poster thumbnail */}
               <Link to={`/movies/${r.movie_id}`} state={{ from: location }} className="shrink-0">
                 {r.poster_path ? (
                   <img
@@ -101,7 +110,7 @@ export default function Reviews() {
                   />
                 ) : (
                   <div className="w-20 h-28 md:w-24 md:h-36 rounded-lg bg-white/10 ring-1 ring-white/10 grid place-items-center text-white/70 text-xs cursor-pointer hover:bg-white/15">
-                    {t('movie.noImage','No image')}
+                    {t('movie.noImage', 'No image')}
                   </div>
                 )}
               </Link>
@@ -110,16 +119,16 @@ export default function Reviews() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <Link to={`/movies/${r.movie_id}`} state={{ from: location }} className="block text-white text-xl md:text-2xl font-semibold hover:underline">
-                      {(r.title || t('movie.unknown','Tuntematon elokuva'))}{r.year ? ` (${r.year})` : ''}
+                      {(r.title || t('movie.unknown', 'Tuntematon elokuva'))}{r.year ? ` (${r.year})` : ''}
                     </Link>
-                    {/* Byline: email · date · stars */}
+                    {/* Byline: author, date, rating */}
                     <div className="mt-1 text-sm text-white/70 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="truncate max-w-[60ch]">{t('reviewPage.by', { email: r.user_email })}</span>
                       <span>· {new Date(r.created_at).toLocaleString()}</span>
                       <span className="text-yellow-400">· {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
                     </div>
                   </div>
-                  {/* Own review delete */}
+                  {/* Own review delete button */}
                   {authUser?.id === r.user_id && (
                     <button
                       onClick={() => onDelete(r)}
@@ -130,12 +139,17 @@ export default function Reviews() {
                   )}
                 </div>
 
-                {/* Comment */}
+                {/* Comment body */}
                 {r.text && (
-                  <div className="mt-3 text-base text-white whitespace-pre-wrap">{r.text}</div>
+                  <div
+                    className="mt-3 text-base text-white whitespace-pre-wrap break-words overflow-x-hidden"
+                    style={{ overflowWrap: 'anywhere' }}
+                  >
+                    {r.text}
+                  </div>
                 )}
 
-                {/* Actions */}
+                {/* actions: open movie */}
                 <div className="mt-4 flex items-center gap-2">
                   <Link to={`/movies/${r.movie_id}`} state={{ from: location }} className="inline-flex items-center gap-2 rounded-md px-4 py-1.5 border border-white/10 bg-white/10 hover:bg-white/15 text-white text-sm">
                     {t('reviewPage.openMovie')}
@@ -151,11 +165,11 @@ export default function Reviews() {
       {totalPages > 1 && (
         <div className="mt-6 flex items-center gap-3">
           <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="px-3 py-2 rounded-xl bg-neutral-800/70 ring-1 ring-white/10 disabled:opacity-40">
-            {t('pagination.prev','Edellinen')}
+            {t('pagination.prev', 'Edellinen')}
           </button>
           <span className="text-sm text-neutral-300">{page} / {totalPages}</span>
           <button onClick={() => setPage(page + 1)} disabled={page >= totalPages} className="px-3 py-2 rounded-xl bg-neutral-800/70 ring-1 ring-white/10 disabled:opacity-40">
-            {t('pagination.next','Seuraava')}
+            {t('pagination.next', 'Seuraava')}
           </button>
         </div>
       )}

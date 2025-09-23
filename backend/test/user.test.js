@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import fetch from 'node-fetch'
 
-const base = 'http://localhost:3001'
+const base = 'http://localhost:3001/api/user'
 
 describe('Auth API', () => {
   const email = `test${Date.now()}@example.com`

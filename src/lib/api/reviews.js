@@ -1,9 +1,11 @@
+// Get all reviews for a movie
 export async function getReviews(movieId) {
   const res = await fetch(`/api/movies/${movieId}/reviews`);
   if (!res.ok) throw new Error('Failed to load reviews');
   return res.json();
 }
 
+// Create or replace the current user's review for a movie
 export async function addOrUpdateMyReview(movieId, { rating, text }, token) {
   const res = await fetch(`/api/movies/${movieId}/reviews`, {
     method: 'POST',
@@ -18,6 +20,7 @@ export async function addOrUpdateMyReview(movieId, { rating, text }, token) {
   return data;
 }
 
+// Partially update my review (sends JSON patch object)
 export async function patchMyReview(movieId, reviewId, patch, token) {
   const res = await fetch(`/api/movies/${movieId}/reviews/${reviewId}`, {
     method: 'PATCH',
@@ -32,6 +35,7 @@ export async function patchMyReview(movieId, reviewId, patch, token) {
   return data;
 }
 
+// Delete my review; expects 204 No Content on success
 export async function deleteMyReview(movieId, reviewId, token) {
   const res = await fetch(`/api/movies/${movieId}/reviews/${reviewId}`, {
     method: 'DELETE',
@@ -44,7 +48,8 @@ export async function deleteMyReview(movieId, reviewId, token) {
   return true;
 }
 
-export async function fetchLatestReviews({ page=1, limit=20 } = {}) {
+// Fetch paginated latest reviews for public feed
+export async function fetchLatestReviews({ page = 1, limit = 20 } = {}) {
   const url = new URL('/api/reviews/latest', window.location.origin);
   url.searchParams.set('page', String(page));
   url.searchParams.set('limit', String(limit));
@@ -53,6 +58,5 @@ export async function fetchLatestReviews({ page=1, limit=20 } = {}) {
   if (!res.ok) throw new Error(data.error || data.message || 'Failed to load latest reviews');
   return data;
 }
-
 
 

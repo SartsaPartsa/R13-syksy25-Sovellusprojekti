@@ -1,3 +1,5 @@
 import { createContext } from 'react'
-export const UserContext = createContext()
 
+// User auth context. Provides authUser, isAuthenticated, 
+// token, favorites, setFavorites
+export const UserContext = createContext()

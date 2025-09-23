@@ -1,5 +1,7 @@
+// --- Config ---
 const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
+// --- URL builder ---
 function buildUrl(path) {
   if (BASE && /\/api\/?$/.test(BASE) && path.startsWith('/api')) {
     return `${BASE}${path.replace(/^\/api/, '')}`
@@ -7,6 +9,7 @@ function buildUrl(path) {
   return `${BASE}${path}`
 }
 
+// --- Fetch wrapper ---
 export async function api(path, opts = {}) {
   const res = await fetch(buildUrl(path), {
     method: 'GET',
@@ -30,6 +33,7 @@ export async function api(path, opts = {}) {
   return data
 }
 
+// --- Auth helpers ---
 export function getAuthToken() {
   try {
     const fromLocal = JSON.parse(localStorage.getItem('auth') || 'null')?.token
@@ -39,12 +43,13 @@ export function getAuthToken() {
     return ''
   }
 }
- 
+
+// --- Account actions ---
 export async function deleteMyAccount(token) {
   const tk = token || getAuthToken()
   if (!tk) throw new Error('No token provided')
 
-  
+
   const res = await fetch('/api/user/me', {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${tk}` },

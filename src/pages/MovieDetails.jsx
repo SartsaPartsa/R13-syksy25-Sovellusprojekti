@@ -1,4 +1,3 @@
-// src/pages/MovieDetails.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +19,7 @@ export default function MovieDetails() {
   useEffect(() => {
     let ignore = false;
     setLoading(true); setError(null);
+    // load movie data from TMDB
     fetchMovie(id, tmdbLang)
       .then(d => { if (!ignore) setData(d); })
       .catch(e => { if (!ignore) setError(e.message); })
@@ -30,12 +30,14 @@ export default function MovieDetails() {
   useEffect(() => {
     if (data?.title) {
       const year = (data.release_date || '').slice(0, 4);
+      // set page title
       document.title = `${data.title}${year ? ` (${year})` : ''} – Movie App`;
     }
   }, [data]);
 
   const year = (data?.release_date || '').slice(0, 4);
   const runtimeText = useMemo(
+    // format runtime
     () => (data?.runtime ? minsToHhMm(data.runtime, i18n.language) : ''),
     [data, i18n.language]
   );
@@ -176,7 +178,7 @@ export default function MovieDetails() {
             </section>
           )}
 
-          {/* ⬇️ Блок отзывов */}
+          {/* Reviews block */}
           <section className="mt-8">
             <MovieReviews />
           </section>
@@ -212,7 +214,7 @@ export default function MovieDetails() {
   );
 }
 
-// helpers
+// Helper functions
 function minsToHhMm(mins, lang = 'en') {
   const h = Math.floor(mins / 60);
   const m = mins % 60;

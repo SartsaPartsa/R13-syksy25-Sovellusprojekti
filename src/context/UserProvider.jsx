@@ -16,9 +16,11 @@ export default function UserProvider({ children }) {
         setAuthUser(a.user)
         setToken(a.token)
       }
-    } catch {}
+    } catch { }
   }, [])
+  // Load auth from localStorage on mount and set state if present
 
+  // Sign in: authenticate, store auth in localStorage and load favorites
   async function signIn(email, password) {
     const res = await fetch('/api/user/signin', {
       method: 'POST',
@@ -32,17 +34,18 @@ export default function UserProvider({ children }) {
     localStorage.setItem('auth', JSON.stringify(auth))
     setAuthUser(auth.user)
     setToken(auth.token)
-    
-    // Lataa käyttäjän suosikit
+
+    // Load user's favorites
     const favRes = await fetch(`/api/favorites/${data.id}`)
     if (favRes.ok) {
       const favData = await favRes.json()
       setFavorites(new Set(favData.map(f => f.movie_id)))
     }
-    
+
     return auth
   }
 
+  // Create a new user using values in `form`
   async function signUp() {
     const { email, password } = form
     const res = await fetch('/api/user/signup', {
@@ -55,15 +58,17 @@ export default function UserProvider({ children }) {
     return data
   }
 
-  
+
+  // Sign out and clear stored auth/favorites
   function signOut() {
-    try { localStorage.removeItem('auth') } catch {}
+    try { localStorage.removeItem('auth') } catch { }
     setFavorites(new Set())
     setAuthUser(null)
     setToken(null)
     setForm({ email: '', password: '' })
   }
 
+  // Quick memoized auth check (token in state or localStorage)
   const isAuthenticated = useMemo(() => {
     if (token) return true
     try { return Boolean(JSON.parse(localStorage.getItem('auth'))?.token) } catch { return false }

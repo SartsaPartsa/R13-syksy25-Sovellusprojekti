@@ -21,6 +21,7 @@ import SharedFavoritesIndex from './pages/SharedFavoritesIndex.jsx'
 export default function App() {
   return (
     <>
+      {/* Toast notifications */}
       <ToastContainer
         position="top-center"
         autoClose={3000}
@@ -29,32 +30,35 @@ export default function App() {
         closeOnClick
         closeButton
         pauseOnFocusLoss={false}
-        limit={3}             
+        limit={3}
       />
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<Home />} />
-        <Route path="/shared/:slug" element={<SharedFavorites />} />
-        <Route path="/shared" element={<SharedFavoritesIndex />} />
-        <Route path="login" element={<Login />} />
-        <Route path="reviews" element={<Reviews />} />
-        <Route path="movies" element={<Reviews />} />
-        <Route path="theaters" element={<Theaters />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/movies/:id" element={<MovieDetails />} />
-        <Route path="groups" element={<Groups />} />
+      {/* App routes */}
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route index element={<Home />} />
+          {/* Public/shared pages */}
+          <Route path="/shared/:slug" element={<SharedFavorites />} />
+          <Route path="/shared" element={<SharedFavoritesIndex />} />
+          <Route path="login" element={<Login />} />
+          <Route path="reviews" element={<Reviews />} />
+          <Route path="movies" element={<Reviews />} />
+          <Route path="theaters" element={<Theaters />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/movies/:id" element={<MovieDetails />} />
+          <Route path="groups" element={<Groups />} />
 
-        {/* Protected routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="favorites" element={<Favorites />} />
-          <Route path="/groups/:id" element={<GroupPage />} />
-          <Route path="account" element={<Account />} />
-          <Route path="account/password" element={<ChangePassword />} /> 
+          {/* Protected routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="favorites" element={<Favorites />} />
+            <Route path="/groups/:id" element={<GroupPage />} />
+            <Route path="account" element={<Account />} />
+            <Route path="account/password" element={<ChangePassword />} />
+          </Route>
+
+          {/* Fallback 404 */}
+          <Route path="*" element={<NotFound />} />
         </Route>
-
-        <Route path="*" element={<NotFound />} />
-      </Route>
-    </Routes>
+      </Routes>
     </>
   )
 }

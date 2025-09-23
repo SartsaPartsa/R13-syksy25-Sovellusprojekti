@@ -7,9 +7,11 @@ import FavoriteButton from '../components/FavoriteButton'
 export default function Search() {
   const location = useLocation()
   const { t, i18n } = useTranslation('common')
+  // map i18n language to TMDB language tag
   const langToTMDB = (lng) => (lng?.startsWith('fi') ? 'fi-FI' : 'en-US')
   const currentYear = new Date().getFullYear()
 
+  // query params
   const [sp, setSp] = useSearchParams()
   const q = sp.get('q') || ''
   const page = Number(sp.get('page') || 1)
@@ -20,6 +22,7 @@ export default function Search() {
   const yearTo = Number(sp.get('yearTo') || 0)
   const sort = sp.get('sort') || '' // ''|'release_desc'|'release_asc'|'rating_desc'|'rating_asc'|'title_asc'|'popularity_desc'
 
+  // local state
   const [genres, setGenres] = useState([])
   const [data, setData] = useState({ page, total_pages: 0, total_results: 0, results: [] })
   const [loading, setLoading] = useState(false)
@@ -62,6 +65,7 @@ export default function Search() {
     return () => { ignore = true }
   }, [q, page, language, genreParam, minRating, yearFrom, yearTo, sort])
 
+  // selected genre ids as a set
   const selectedGenreIds = useMemo(
     () => new Set(genreParam ? genreParam.split(',').map((s) => Number(s)).filter((n) => !Number.isNaN(n)) : []),
     [genreParam]
@@ -74,7 +78,8 @@ export default function Search() {
         if (v === '' || v === undefined || v === null) p.delete(k)
         else p.set(k, String(v))
       })
-      if (['genre','minRating','yearFrom','yearTo','sort','language'].some(k => k in updates)) {
+      // reset page when filters change
+      if (['genre', 'minRating', 'yearFrom', 'yearTo', 'sort', 'language'].some(k => k in updates)) {
         p.set('page', '1')
       }
       return p
@@ -174,9 +179,8 @@ export default function Search() {
 
       {/* Filters panel */}
       <div
-        className={`rounded-2xl bg-neutral-800/60 backdrop-blur-md ring-1 ring-white/10 transition-all overflow-hidden ${
-          filtersOpen ? 'max-h-[900px] opacity-100 p-4 mb-6' : 'max-h-0 opacity-0 p-0 mb-0'
-        }`}
+        className={`rounded-2xl bg-neutral-800/60 backdrop-blur-md ring-1 ring-white/10 transition-all overflow-hidden ${filtersOpen ? 'max-h-[900px] opacity-100 p-4 mb-6' : 'max-h-0 opacity-0 p-0 mb-0'
+          }`}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
           {/* GENRES */}
@@ -188,11 +192,10 @@ export default function Search() {
                   key={g.id}
                   type="button"
                   onClick={() => toggleGenre(g.id)}
-                  className={`px-3 py-1.5 rounded-full text-sm border transition ${
-                    selectedGenreIds.has(g.id)
-                      ? 'bg-[#F18800] text-black border-[#F18800]'
-                      : 'bg-neutral-900/50 text-neutral-300 border-neutral-700 hover:border-neutral-500'
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition ${selectedGenreIds.has(g.id)
+                    ? 'bg-[#F18800] text-black border-[#F18800]'
+                    : 'bg-neutral-900/50 text-neutral-300 border-neutral-700 hover:border-neutral-500'
+                    }`}
                 >
                   {g.name}
                 </button>

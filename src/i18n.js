@@ -1,6 +1,9 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
+// Simple i18n setup for the app.
+// Stores translation resources and initializes i18next.
+
 const resources = {
   fi: {
     common: {
@@ -176,30 +179,28 @@ const resources = {
       title: 'Tervetuloa Movie Appiin!',
       subtitle: 'Elokuvaharrastajien oma yhteisö - löydä elokuvat, tarkasta näytösajat, kirjoita arvosteluja ja jaa suosikkisi muiden kanssa.',
       introTitle: 'Päivän leffa',
-      introLead: 'John Wick',
+      homeDailyOpen: 'Avaa elokuvan sivu',
       showsTitle: 'Näytökset',
-      showsLead: 'Tähän myöhemmin API-haku.',
       reviewsTitle: 'Arvostelut',
-      reviewsLead: 'Käyttäjien arviot elokuvista.',
       footerApiSources: 'API-lähteet',
       footerAuthors: 'Tekijät',
       footerFinnkinoApi: 'Finnkino API',
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Ryhmä 13',
       footerFollowUs: 'Seuraa meitä',
-      reviewPage:{
-            title:"Elokuvan arvostelu"
-          },
-          filters:{
-            genre:"Genre",
-            minRating:"Minimiarvio"
-          },
-          loading:"Ladataan...",
-          noResults:"Ei tuloksia",
-          pagination:{
-            previous:"Edellinen",
-            next:"Seuraava"
-          },
+      reviewPage: {
+        title: "Elokuvan arvostelu"
+      },
+      filters: {
+        genre: "Genre",
+        minRating: "Minimiarvio"
+      },
+      loading: "Ladataan...",
+      noResults: "Ei tuloksia",
+      pagination: {
+        previous: "Edellinen",
+        next: "Seuraava"
+      },
       notFound: {
         title: '404',
         lead: 'Sivua ei löytynyt.',
@@ -268,6 +269,7 @@ const resources = {
         comment: 'Kommentti'
       },
       account: {
+        confirmTitle: 'Poista tili?',
         deleteBtn: 'Poista tili',
         deleting: 'Poistetaan…',
         confirmDelete: 'Haluatko varmasti poistaa tilin? Tätä toimintoa ei voi perua.',
@@ -470,30 +472,28 @@ const resources = {
       title: 'Welcome to Movie App!',
       subtitle: 'The community for movie enthusiasts - discover movies, check showtimes, write reviews, and share your favorites with others.',
       introTitle: 'Movie Of The Day',
-      introLead: 'John Wick',
+      homeDailyOpen: 'Open movie page',
       showsTitle: 'Showtimes',
-      showsLead: 'API fetch coming later.',
       reviewsTitle: 'Reviews',
-      reviewsLead: 'User reviews of movies.',
       footerApiSources: 'API sources',
       footerAuthors: 'Authors',
       footerFinnkinoApi: 'Finnkino API',
       footerTmdbApi: 'TMDB API',
       footerTeamR13: 'Team 13',
       footerFollowUs: 'Follow us',
-      reviewPage:{
-        title:"Movie Review",
+      reviewPage: {
+        title: "Movie Review",
         empty: 'No reviews yet.'
       },
-      filters:{
-        genre:"Genre",
-        minRating:"Minimum rating"
+      filters: {
+        genre: "Genre",
+        minRating: "Minimum rating"
       },
-      loading:"Loading...",
-      noResults:"No results found",
-      pagination:{
-        previous:"Previous",
-        next:"Next"
+      loading: "Loading...",
+      noResults: "No results found",
+      pagination: {
+        previous: "Previous",
+        next: "Next"
       },
       notFound: {
         title: '404',
@@ -566,6 +566,7 @@ const resources = {
         comment: 'Comment'
       },
       account: {
+        confirmTitle: 'Delete account?',
         deleteBtn: 'Delete account',
         deleting: 'Deleting…',
         confirmDelete: 'Are you sure you want to delete your account? This cannot be undone.',
@@ -594,6 +595,7 @@ const resources = {
   },
 }
 
+// Initialize i18n: load resources, pick language from localStorage, set fallback
 i18n
   .use(initReactI18next)
   .init({

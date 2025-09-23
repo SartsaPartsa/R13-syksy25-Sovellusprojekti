@@ -4,11 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { FavoritesAPI } from '../lib/api'
 
 export default function SharedFavoritesIndex() {
+  // List all shared favorites lists
   const { t } = useTranslation('common')
+  // state
   const [lists, setLists] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  // load shared lists
   useEffect(() => {
     let ignore = false
     async function load() {
@@ -29,6 +32,7 @@ export default function SharedFavoritesIndex() {
       {!loading && lists.length === 0 && (
         <div className="text-neutral-300">{t('favoritesShare.noneSharedYet')}</div>
       )}
+      {/* Lists */}
       <div className="flex flex-wrap gap-2">
         {lists.map((s) => (
           <Link
