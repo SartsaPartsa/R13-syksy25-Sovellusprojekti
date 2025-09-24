@@ -74,7 +74,12 @@ npm install
 npm run dev
 
 backend: 
+cd backend
 npm install
 npm run devStart
-```
 
+aja testit terminaalissa:
+cd backend
+npm install (tämä vain kerran)
+npm test
+```
