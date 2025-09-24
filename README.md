@@ -74,7 +74,16 @@ npm install
 npm run dev
 
 backend: 
+cd backend
 npm install
 npm run devStart
-```
 
+aja testit terminaalissa:
+cd backend
+npm install (tämä vain kerran)
+NODE_ENV=test npm run devStart
+
+erillisessä terminaali ikkunassa:
+cd backend
+npm test
+```

@@ -125,7 +125,10 @@ export default function Reviews() {
                     <div className="mt-1 text-sm text-white/70 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="truncate max-w-[60ch]">{t('reviewPage.by', { email: r.user_email })}</span>
                       <span>· {new Date(r.created_at).toLocaleString()}</span>
-                      <span className="text-yellow-400">· {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                      <span>
+                        <span className="text-white/70">· </span>
+                        <span className="text-yellow-400">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                      </span>
                     </div>
                   </div>
                   {/* Own review delete button */}

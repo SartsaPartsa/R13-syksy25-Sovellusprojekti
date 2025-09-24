@@ -160,7 +160,7 @@ export default function Home() {
                           {/* CTA aligned bottom */}
                           <div className="mt-auto pt-1">
                             <a href={buildFinnkinoEventUrl(s.eventId, s.title)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 border border-white/10 bg-white/10 hover:bg-white/15 text-white text-xs">
-                              {t('reviewPage.openMovie')}
+                              {t('homeShowsOpen')}
                               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                             </a>
                           </div>
