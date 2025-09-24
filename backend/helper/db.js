@@ -9,20 +9,24 @@ dotenv.config()
 // runtime environment, defaults to development
 const environment = process.env.NODE_ENV || 'development'
 
-const port = process.env.port
 const { Pool } = pkg
 
 // build pool from env
 const openDb = () => {
+  const dbName = environment === 'test' ? process.env.TEST_DB_NAME : process.env.DB_NAME
+  const host = process.env.DB_HOST
+  const dbPort = process.env.DB_PORT
+
+  // Log which database connection will be used (env, host, port, db name)
+  console.log(`[db] env=${environment} -> host=${host}:${dbPort} database=${dbName}`)
+
   const pool = new Pool({
     user: process.env.DB_USER,
-    host: process.env.DB_HOST,
+    host,
     // Use test database only when NODE_ENV is 'test'
-    database: environment === 'test'
-      ? process.env.TEST_DB_NAME
-      : process.env.DB_NAME,
+    database: dbName,
     password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT
+    port: dbPort
   })
   return pool
 }
