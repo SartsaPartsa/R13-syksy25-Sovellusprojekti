@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "devStart": "nodemon index.js",
+    "start": "node index.js",
     "test": "cross-env NODE_ENV=test TEST_BASE_URL=http://localhost:3001 mocha test/setup.test.js \"test/**/*.test.js\" --exclude test/setup.test.js"
   },
   "keywords": [],

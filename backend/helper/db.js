@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 // runtime environment, defaults to development
 const environment = process.env.NODE_ENV || 'development'
+const isProd = environment === 'production'
 
 const { Pool } = pkg
 
@@ -26,7 +27,9 @@ const openDb = () => {
     // Use test database only when NODE_ENV is 'test'
     database: dbName,
     password: process.env.DB_PASSWORD,
-    port: dbPort
+    port: dbPort,
+    // Render PostgreSQL requires SSL
+    ssl: isProd ? { rejectUnauthorized: false } : false
   })
   return pool
 }
