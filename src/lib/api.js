@@ -11,7 +11,8 @@ export function buildUrl(path) {
 
 // --- Fetch wrapper ---
 export async function api(path, opts = {}) {
-  const res = await fetch(buildUrl(path), {
+  const url = /^https?:\/\//i.test(path) ? path : buildUrl(path)
+  const res = await fetch(url, {
     method: 'GET',
     ...opts,
     headers: {

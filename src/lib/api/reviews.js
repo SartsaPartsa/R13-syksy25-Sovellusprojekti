@@ -1,4 +1,4 @@
-import { api, buildUrl } from '../api'
+import { api } from '../api'
 
 // Get all reviews for a movie
 export async function getReviews(movieId) {
@@ -34,8 +34,20 @@ export async function deleteMyReview(movieId, reviewId, token) {
 
 // Fetch paginated latest reviews for public feed
 export async function fetchLatestReviews({ page = 1, limit = 20 } = {}) {
-  const url = buildUrl(`/api/reviews/latest?page=${encodeURIComponent(String(page))}&limit=${encodeURIComponent(String(limit))}`)
-  return api(url)
+  const url = `/api/reviews/latest?page=${encodeURIComponent(String(page))}&limit=${encodeURIComponent(String(limit))}`
+  try {
+    return await api(url)
+  } catch (e) {
+    // Fallback
+    if (e?.status === 404) {
+      const alt = `/api/review/latest?page=${encodeURIComponent(String(page))}&limit=${encodeURIComponent(String(limit))}`
+      try { return await api(alt) } catch (_) {
+        // If still 404: return empty list
+        return { items: [], total: 0, page, limit }
+      }
+    }
+    throw e
+  }
 }
 
 
