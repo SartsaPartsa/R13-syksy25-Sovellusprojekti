@@ -1,3 +1,4 @@
+import { api } from '../api'
 /** Fetch movies. Returns an empty page if "q" is empty */
 export async function fetchMovies({
   q,
@@ -21,22 +22,11 @@ export async function fetchMovies({
   if (sort) params.set('sort', sort)
 
   // Call backend, throw on error
-  const res = await fetch(`/api/search/movies?${params.toString()}`)
-  // Surface a readable error if the backend fails.
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`Search failed (${res.status}): ${text}`)
-  }
-  return res.json()
+  return api(`/api/search/movies?${params.toString()}`)
 }
 
 export async function fetchGenres(language = 'fi-FI') {
   // Get genres (localized)
   const url = `/api/search/genres?language=${encodeURIComponent(language)}`
-  const res = await fetch(url)
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`Genres failed (${res.status}): ${text}`)
-  }
-  return res.json()
+  return api(url)
 }

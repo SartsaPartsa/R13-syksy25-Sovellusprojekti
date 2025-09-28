@@ -3,7 +3,7 @@ import { UserContext } from "../context/UserContext"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation, useSearchParams } from "react-router-dom"
 import { fetchMovie } from "../lib/api/movies"
-import { api, FavoritesAPI } from "../lib/api"
+import { api, FavoritesAPI, buildUrl } from "../lib/api"
 import { toast } from 'react-toastify'
 
 // requires login
@@ -91,7 +91,7 @@ export default function Favorites() {
     let cancelled = false
     const start = () => {
       try {
-        es = new EventSource('/api/favorites/stream')
+  es = new EventSource(buildUrl('/api/favorites/stream'))
         const reload = async () => {
           try {
             const shared = await FavoritesAPI.sharedLists().catch(() => [])
@@ -139,11 +139,8 @@ export default function Favorites() {
 
     try {
       // delete from backend
-      const response = await fetch(`/api/favorites/${authUser.id}/${movieId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
+      try {
+        await api(`/api/favorites/${authUser.id}/${movieId}`, { method: 'DELETE' })
         // remove from local favorites
         const newFavorites = new Set(favorites);
         newFavorites.delete(movieId);
@@ -151,7 +148,7 @@ export default function Favorites() {
 
         // remove from displayed movies
         setMovies(movies.filter(m => m.id !== movieId));
-      }
+      } catch (e) { /* ilmoitus alempana */ }
     } catch (error) {
       console.error('Virhe suosikin poistamisessa:', error);
       try { toast.error(t('favoritesShare.removeFailed')) } catch { }

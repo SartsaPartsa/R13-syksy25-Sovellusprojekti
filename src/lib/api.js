@@ -2,7 +2,7 @@
 const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
 // --- URL builder ---
-function buildUrl(path) {
+export function buildUrl(path) {
   if (BASE && /\/api\/?$/.test(BASE) && path.startsWith('/api')) {
     return `${BASE}${path.replace(/^\/api/, '')}`
   }
@@ -11,7 +11,8 @@ function buildUrl(path) {
 
 // --- Fetch wrapper ---
 export async function api(path, opts = {}) {
-  const res = await fetch(buildUrl(path), {
+  const url = /^https?:\/\//i.test(path) ? path : buildUrl(path)
+  const res = await fetch(url, {
     method: 'GET',
     ...opts,
     headers: {
@@ -48,17 +49,8 @@ export function getAuthToken() {
 export async function deleteMyAccount(token) {
   const tk = token || getAuthToken()
   if (!tk) throw new Error('No token provided')
-
-
-  const res = await fetch('/api/user/me', {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${tk}` },
-  })
-
-  if (res.status === 204) return true
-
-  const data = await res.json().catch(() => ({}))
-  throw new Error(data.error || data.message || `Failed (${res.status})`)
+  await api('/api/user/me', { method: 'DELETE', headers: { Authorization: `Bearer ${tk}` } })
+  return true
 }
 
 export async function changeMyPassword(currentPassword, newPassword, token) {
@@ -66,19 +58,12 @@ export async function changeMyPassword(currentPassword, newPassword, token) {
     try { return JSON.parse(localStorage.getItem('auth'))?.token || '' } catch { return '' }
   })();
   if (!tk) throw new Error('No token provided');
-
-  const res = await fetch('/api/user/me/password', {
+  await api('/api/user/me/password', {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${tk}`,
-    },
+    headers: { Authorization: `Bearer ${tk}` },
     body: JSON.stringify({ currentPassword, newPassword }),
-  });
-
-  if (res.status === 204) return true;
-  const data = await res.json().catch(() => ({}));
-  throw new Error(data.error || data.message || `Failed (${res.status})`);
+  })
+  return true
 }
 
 // --- Groups API ---
