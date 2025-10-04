@@ -260,28 +260,13 @@ npm test user     # Run specific test suite
 #### Test Structure
 ```
 backend/test/
-├── setup.test.js         # Test environment setup
-├── user.test.js         # User API tests
-├── movies.test.js       # Movie API tests
-└── groups.test.js       # Group functionality tests
-```
-
-#### Writing Tests
-```javascript
-// Example test structure
-describe('User API', () => {
-  before(async () => {
-    // Setup test database
-  });
-
-  it('should register new user', async () => {
-    // Test implementation
-  });
-
-  after(() => {
-    // Cleanup
-  });
-});
+├── auth.login.test.js       # Authentication login tests
+├── auth.logout.test.js      # Authentication logout tests
+├── auth.signup.test.js      # User signup tests
+├── reviews.browse.test.js   # Review browsing tests
+├── setup.test.js           # Test environment setup
+├── user.deleteUser.test.js # User deletion tests
+└── user.getCount.test.js   # User count tests
 ```
 
 ---
@@ -290,21 +275,62 @@ describe('User API', () => {
 
 ```
 ├── backend/                  # Backend server implementation
+│   ├── controllers/         # API controllers
+│   │   ├── favoritesController.js # Favorites handling
+│   │   ├── groupController.js     # Group management
+│   │   ├── movieController.js     # Movie operations
+│   │   ├── reviewController.js    # Review handling
+│   │   ├── searchController.js    # Search functionality
+│   │   └── userController.js      # User management
 │   ├── helper/              # Helper functions and utilities
 │   │   ├── auth.js         # Authentication helper functions
-│   │   ├── db.js          # Database connection and queries
+│   │   ├── db.js           # Database connection and queries
+│   │   ├── test.js         # Test helper functions
 │   │   └── tmdbClient.js   # TMDB API client implementation
+│   ├── models/             # Database models
+│   │   ├── favoritesModel.js  # Favorites data model
+│   │   ├── groupModel.js      # Group data model
+│   │   ├── reviewModel.js     # Review data model
+│   │   └── userModel.js       # User data model
 │   ├── routes/             # API route handlers
-│   │   ├── favoritesRouter.js    # Favorites endpoints
-│   │   ├── groupRouter.js        # Group management endpoints
-│   │   ├── movieRouter.js        # Movie-related endpoints
-│   │   ├── searchRouter.js       # Search functionality
-│   │   └── userRouter.js         # User management endpoints
+│   │   ├── favoritesRouter.js # Favorites endpoints
+│   │   ├── groupRouter.js     # Group management endpoints
+│   │   ├── movieRouter.js     # Movie-related endpoints
+│   │   ├── searchRouter.js    # Search functionality
+│   │   └── userRouter.js      # User management endpoints
 │   ├── test/               # Backend tests
-│   │   └── user.test.js    # User-related tests
-│   ├── index.js           # Main backend entry point
-│   ├── movieApp.sql       # Database schema
-│   └── package.json       # Backend dependencies
+│   │   ├── auth.login.test.js      # Authentication login tests
+│   │   ├── auth.logout.test.js     # Authentication logout tests
+│   │   ├── auth.signup.test.js     # User signup tests
+│   │   ├── reviews.browse.test.js  # Review browsing tests
+│   │   ├── setup.test.js           # Test environment setup
+│   │   ├── user.deleteUser.test.js # User deletion tests
+│   │   └── user.getCount.test.js   # User count tests
+│   ├── .env               # Environment variables
+│   ├── .env.example       # Environment variables template
+│   ├── index.js          # Main backend entry point
+│   ├── movieApp.sql      # Database schema
+│   └── package.json      # Backend dependencies
+│
+├── documents/            # Project documentation
+│   ├── database_class_diagram.pdf  # Database diagram
+│   ├── rest.md                     # REST API documentation
+│   └── UI Design/                  # UI design files
+│       ├── Elokuva.pdf            # Movie view design
+│       ├── Elokuvat.pdf           # Movies list design
+│       ├── Etusivu.pdf            # Homepage design
+│       ├── Haku.pdf               # Search view design
+│       ├── Info.md                # Design information
+│       ├── Kirjautuminen.pdf      # Login view design
+│       ├── Omat tiedot.pdf        # Profile view design
+│       ├── Rekiteröityminen.pdf   # Registration design
+│       ├── Ryhmä näkymä-1.pdf     # Group view 1 design
+│       ├── Ryhmä näkymä.pdf       # Group view 2 design
+│       ├── Ryhmät.pdf             # Groups list design
+│       ├── Suosikit.pdf           # Favorites design
+│       ├── Teatterit.pdf          # Theaters design
+│       ├── Valikko - Kirjautumatta.pdf      # Menu (logged out)
+│       └── Valikko - Kirjautumisen jälkeen.pdf  # Menu (logged in)
 │
 ├── src/                    # Frontend source code
 │   ├── assets/            # Static assets
@@ -353,12 +379,14 @@ describe('User API', () => {
 │   │
 │   ├── App.jsx          # Root application component
 │   ├── i18n.js          # Internationalization setup
-│   ├── index.css        # Global CSS
 │   └── main.jsx         # Application entry point
 │
-├── .env.example         # Example environment variables
+├── .env                 # Environment variables
+├── .env.example         # Environment variables template
+├── .gitignore          # Git ignore file
 ├── eslint.config.js     # ESLint configuration
 ├── index.html          # HTML entry point
+├── LICENSE             # Project license
 ├── package.json        # Frontend dependencies
 ├── postcss.config.js   # PostCSS configuration
 ├── README.md          # Project documentation
