@@ -7,6 +7,8 @@ This project was developed as part of the "Web Development Application Project" 
 
 ### Project Team
 
+| Name | GitHub |
+|:---|:---|
 | <img src="https://github.com/SartsaPartsa.png" width="30" height="30"> Sara Vehviläinen | [SartsaPartsa](https://github.com/SartsaPartsa) |
 | <img src="https://github.com/t2koan07.png" width="30" height="30"> Andreas Kotala | [t2koan07](https://github.com/t2koan07) |
 | <img src="https://github.com/c3komi01.png" width="30" height="30"> Mihail Konstantinov | [c3komi01](https://github.com/c3komi01) |
