@@ -254,7 +254,6 @@ NODE_ENV=test npm run devStart
 
 # In another terminal
 npm test          # Runs all tests
-npm test user     # Run specific test suite
 ```
 
 #### Test Structure
