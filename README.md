@@ -176,7 +176,7 @@ Full database schema and setup available in `backend/movieApp.sql`
 ## API Reference
 
 ### Authentication API
-```http
+```
 POST /api/auth/register
 # Register new user
 # Body: { username, email, password }
@@ -193,7 +193,7 @@ POST /api/auth/change-password
 ```
 
 ### Movies API
-```http
+```
 GET /api/movies
 # List movies with optional filters
 # Query: { page, genre, year, sort }
@@ -208,20 +208,20 @@ GET /api/movies/search
 ```
 
 ### User Features API
-```http
+```
 # Favorites
-GET    /api/favorites     # List user's favorites
-POST   /api/favorites     # Add movie to favorites
-DELETE /api/favorites/:id # Remove from favorites
+GET   /api/favorites         # List user's favorites
+POST  /api/favorites        # Add movie to favorites
+DELETE /api/favorites/:id   # Remove from favorites
 
 # Groups
-GET    /api/groups       # List user's groups
-POST   /api/groups       # Create new group
-PUT    /api/groups/:id   # Update group
-DELETE /api/groups/:id   # Delete group
+GET    /api/groups         # List user's groups
+POST   /api/groups         # Create new group
+PUT    /api/groups/:id     # Update group info
+DELETE /api/groups/:id     # Delete group
 ```
 
-All protected endpoints require `Authorization: Bearer <token>` header.
+> **Note:** All protected endpoints require `Authorization: Bearer <token>` header
 
 ## Development Guide
 
