@@ -160,11 +160,9 @@ Full database schema and setup available in `backend/movieApp.sql`
 
 1. **API Rate Limits**
    - TMDB API has a rate limit of 40 requests per 10 seconds
-   - Movie data is cached in database to minimize API calls
 
 2. **Theater Information**
    - Real-time theater schedules available only from Finnkino
-   - Limited to Finnkino theaters only
 
 3. **Authentication Features**
    - Password reset functionality not implemented
