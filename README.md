@@ -173,50 +173,104 @@ Full database schema and setup available in `backend/movieApp.sql`
 
 ## API Reference
 
-### Authentication API
+### User API
 ```
-POST /api/auth/register
+POST /api/user/signup
 # Register new user
 # Body: { username, email, password }
 
-POST /api/auth/login
+POST /api/user/signin
 # Authenticate user
 # Body: { email, password }
 # Returns: JWT token
 
-POST /api/auth/change-password
+PATCH /api/user/me/password
 # Change user password
 # Headers: Authorization: Bearer <token>
 # Body: { currentPassword, newPassword }
+
+DELETE /api/user/me
+# Delete own account
+# Headers: Authorization: Bearer <token>
+
+GET /api/user/profile
+# Get user profile
+# Headers: Authorization: Bearer <token>
+```
+
+### Favorites API
+```
+GET   /api/favorites/:userId      # Get user's favorites
+POST  /api/favorites             # Add movie to favorites
+DELETE /api/favorites/:userId/:movieId  # Remove from favorites
+
+# Sharing
+GET   /api/favorites/shared      # List all shared favorites (public)
+GET   /api/favorites/share/me    # Get my shared favorites (auth)
+POST  /api/favorites/share       # Update share settings (auth)
+GET   /api/favorites/share/:slug # Get shared favorites by slug (public)
+GET   /api/favorites/share/:slug/movies # Get movies from shared list (public)
+GET   /api/favorites/stream      # Stream shared favorites updates (public)
+```
+
+### Groups API
+```
+GET    /api/groups              # List all groups
+POST   /api/groups              # Create new group (auth)
+GET    /api/groups/stream       # Stream all group updates (auth)
+GET    /api/groups/:id          # Get group details
+DELETE /api/groups/:id          # Delete group (owner only)
+
+# Members
+POST   /api/groups/:id/join     # Join group (auth, sets PENDING)
+GET    /api/groups/:id/members   # List group members (auth)
+DELETE /api/groups/:id/members/me    # Leave group (auth, not owner)
+DELETE /api/groups/:id/members/:userId # Remove member (owner/moderator)
+
+# Group Movies
+GET    /api/groups/:id/movies    # List group movies (auth)
+POST   /api/groups/:id/movies    # Add movie to group (members)
+DELETE /api/groups/:id/movies/:gmId # Remove movie from group (added-by only)
+
+# Group Member Status
+PATCH  /api/groups/:id/members/:userId # Update member status (owner/moderator)
+GET    /api/groups/:id/membership/me   # Get my membership status (auth)
+
+# Group Showtimes
+POST   /api/groups/:id/movies/:gmId/showtimes     # Add showtime (members)
+DELETE /api/groups/:id/movies/:gmId/showtimes/:sid # Delete showtime (added-by only)
+GET    /api/groups/:id/stream          # Stream group updates
 ```
 
 ### Movies API
 ```
-GET /api/movies
-# List movies with optional filters
-# Query: { page, genre, year, sort }
+GET /api/movies/popular/today
+# Get popular movies for today
+# Returns: List of popular movies
 
 GET /api/movies/:id
 # Get detailed movie information
 # Returns: Movie details + local theater info
 
-GET /api/movies/search
-# Search movies
-# Query: { q, type, language }
+# Movie Reviews
+GET    /api/movies/:movieId/reviews      # List movie reviews (public)
+POST   /api/movies/:movieId/reviews      # Create/update review (auth)
+PATCH  /api/movies/:movieId/reviews/:id  # Update own review (auth)
+DELETE /api/movies/:movieId/reviews/:id  # Delete own review (auth)
+
+# Public Reviews
+GET    /api/reviews/latest              # Get latest reviews with reviewer info (public)
 ```
 
-### User Features API
+### Search API
 ```
-# Favorites
-GET   /api/favorites         # List user's favorites
-POST  /api/favorites        # Add movie to favorites
-DELETE /api/favorites/:id   # Remove from favorites
+GET /api/search/genres
+# Get list of movie genres
+# Query: { language } (optional)
 
-# Groups
-GET    /api/groups         # List user's groups
-POST   /api/groups         # Create new group
-PUT    /api/groups/:id     # Update group info
-DELETE /api/groups/:id     # Delete group
+GET /api/search/movies
+# Search movies with filters
+# Query: { q (required), page, language, minRating, genre, yearFrom, yearTo, sort }
 ```
 
 > **Note:** All protected endpoints require `Authorization: Bearer <token>` header
