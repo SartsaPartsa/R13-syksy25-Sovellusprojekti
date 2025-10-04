@@ -6,10 +6,13 @@
 This project was developed as part of the "Web Development Application Project" course at Oulu University of Applied Sciences (OAMK). It's a modern web application that combines movie browsing, social features, and real-time theater information in a responsive, bilingual interface.
 
 ### Project Team
-- [Sara Vehviläinen] (@SartsaPartsa)
-- [Andreas Kotala] (@t2koan07)
-- [Mihail Konstantinov] (@c3komi01)
-- [Janika Ahonen] (@Janikaho)
+
+| Avatar | Name | GitHub |
+|:---:|:---|:---|
+| ![SartsaPartsa](https://github.com/SartsaPartsa.png?size=50) | Sara Vehviläinen | [SartsaPartsa](https://github.com/SartsaPartsa) |
+| ![t2koan07](https://github.com/t2koan07.png?size=50) | Andreas Kotala | [t2koan07](https://github.com/t2koan07) |
+| ![c3komi01](https://github.com/c3komi01.png?size=50) | Mihail Konstantinov | [c3komi01](https://github.com/c3komi01) |
+| ![Janikaho](https://github.com/Janikaho.png?size=50) | Janika Ahonen | [Janikaho](https://github.com/Janikaho) |
 
 Fall 2025 Web Development Group
 
