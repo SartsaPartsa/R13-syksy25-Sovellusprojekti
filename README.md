@@ -9,10 +9,10 @@ This project was developed as part of the "Web Development Application Project" 
 
 | Name | GitHub |
 |:---|:---|
-| <img src="https://github.com/SartsaPartsa.png" width="30" height="30"> Sara Vehviläinen | [SartsaPartsa](https://github.com/SartsaPartsa) |
-| <img src="https://github.com/t2koan07.png" width="30" height="30"> Andreas Kotala | [t2koan07](https://github.com/t2koan07) |
-| <img src="https://github.com/c3komi01.png" width="30" height="30"> Mihail Konstantinov | [c3komi01](https://github.com/c3komi01) |
-| <img src="https://github.com/Janikaho.png" width="30" height="30"> Janika Ahonen | [Janikaho](https://github.com/Janikaho) |
+| <img src="https://github.com/SartsaPartsa.png" width="30" height="30"> | [SartsaPartsa](https://github.com/SartsaPartsa) |
+| <img src="https://github.com/t2koan07.png" width="30" height="30"> | [t2koan07](https://github.com/t2koan07) |
+| <img src="https://github.com/c3komi01.png" width="30" height="30"> | [c3komi01](https://github.com/c3komi01) |
+| <img src="https://github.com/Janikaho.png" width="30" height="30"> | [Janikaho](https://github.com/Janikaho) |
 
 
 ### Project Overview
